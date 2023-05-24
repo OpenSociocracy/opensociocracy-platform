@@ -1,0 +1,9 @@
+node_modules
+docs/.vitepress/dist
+docs/.vitepress/cache
+docs/.vitepress/cache/deps/_metadata.json
+.env
+.env-*
+*.log
+logs/gateway/nginx.pid
+
