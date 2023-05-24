@@ -87,6 +87,25 @@ services:
       - "./api/app.js:/usr/src/app/app.js"
       - "./api/server.js:/usr/src/app/server.js"
 
+  gateway:
+    image: ultri/open-platform-gateway:latest
+    container_name: opensociocracy-gateway
+    restart: no
+    ports:
+      - "80:80"
+    env_file: ".env"
+    networks:
+      - opensociocracy-net
+    volumes:
+      - "./gateway/config/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf"
+      - "./gateway/html:/usr/local/openresty/nginx/html"
+      - "./logs/gateway:/usr/local/openresty/nginx/logs"
+    depends_on:
+      - api
+      - supertokens
+      - redis
+      - postgres
+
 
 volumes:
   opensociocracy-smtp4dev: {}
