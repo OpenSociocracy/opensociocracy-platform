@@ -1,0 +1,21 @@
+{
+  "availability-zones:account=634272504630:region=us-east-1": [
+    "us-east-1a",
+    "us-east-1b",
+    "us-east-1c",
+    "us-east-1d",
+    "us-east-1e",
+    "us-east-1f"
+  ],
+  "hosted-zone:account=634272504630:domainName=service.opensociocracy.org:region=us-east-1": {
+    "Id": "/hostedzone/Z03885661UM6DLIOLNAXK",
+    "Name": "service.opensociocracy.org."
+  },
+  "ami:account=634272504630:filters.image-type.0=machine:filters.name.0=AppServer-v0.1.0:filters.state.0=available:region=us-east-1": "ami-0c528145992c221bf",
+  "ami:account=634272504630:filters.image-type.0=machine:filters.name.0=server2:filters.state.0=available:region=us-east-1": "ami-049bfa1f9917e83ae",
+  "ami:account=634272504630:filters.image-type.0=machine:filters.name.0=server2.0.1:filters.state.0=available:region=us-east-1": "ami-052f33b636c427bae",
+  "ami:account=634272504630:filters.image-type.0=machine:filters.name.0=sever2.0.2:filters.state.0=available:region=us-east-1": "ami-0f38d656e16f48e12",
+  "ami:account=634272504630:filters.image-type.0=machine:filters.name.0=server2.0.3:filters.state.0=available:region=us-east-1": "ami-0aef6ca247bb82f4b",
+  "ami:account=634272504630:filters.image-type.0=machine:filters.name.0=server2.0.5:filters.state.0=available:region=us-east-1": "ami-00f7ff9a32c7b5adb",
+  "ami:account=634272504630:filters.image-type.0=machine:filters.name.0=server2.0.6:filters.state.0=available:region=us-east-1": "ami-088a9bf14aa6762a2"
+}
