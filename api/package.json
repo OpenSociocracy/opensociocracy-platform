@@ -28,6 +28,7 @@
     "@fastify/env": "^4.2.0",
     "@fastify/formbody": "^7.4.0",
     "@fastify/postgres": "^5.2.0",
+    "@fastify/redis": "^6.1.1",
     "@fastify/swagger": "^8.5.1",
     "@fastify/swagger-ui": "^1.8.1",
     "fastify": "^4.10.2",
