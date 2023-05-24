@@ -26,6 +26,8 @@
     "@fastify/cors": "^8.2.0",
     "@fastify/env": "^4.2.0",
     "@fastify/formbody": "^7.4.0",
+    "@fastify/swagger": "^8.5.1",
+    "@fastify/swagger-ui": "^1.8.1",
     "fastify": "^4.10.2",
     "fastify-plugin": "^4.4.0",
     "supertokens-node": "^12.1.4"
