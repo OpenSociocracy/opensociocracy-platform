@@ -1,0 +1,27 @@
+#!/bin/bash
+set -e
+export PGPASSWORD=$POSTGRES_PASSWORD;
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER"  --dbname "$DB_NAME" <<-EOSQL
+  BEGIN;
+    ALTER ROLE $API_USER SET search_path = opensociocracy_api,public;
+    ALTER ROLE $SUPERTOKENS_USER SET search_path = supertokens,public;
+
+    GRANT USAGE ON SCHEMA opensociocracy_api TO $API_USER;
+    GRANT CREATE ON DATABASE opensociocracy TO $API_USER;
+    GRANT ALL ON ALL SEQUENCES IN SCHEMA opensociocracy_api TO $API_USER;
+    GRANT ALL ON ALL TABLES IN SCHEMA opensociocracy_api TO $API_USER;
+    GRANT ALL ON ALL FUNCTIONS IN SCHEMA opensociocracy_api TO $API_USER;
+    ALTER SCHEMA opensociocracy_api OWNER TO $API_USER;
+
+    GRANT USAGE ON SCHEMA supertokens TO $SUPERTOKENS_USER;
+    GRANT ALL ON ALL SEQUENCES IN SCHEMA supertokens TO $SUPERTOKENS_USER;
+    GRANT ALL ON ALL TABLES IN SCHEMA supertokens TO $SUPERTOKENS_USER;
+    GRANT USAGE ON SCHEMA opensociocracy_api TO $SUPERTOKENS_USER;
+    GRANT ALL ON ALL SEQUENCES IN SCHEMA opensociocracy_api TO $SUPERTOKENS_USER;
+    GRANT ALL ON ALL TABLES IN SCHEMA opensociocracy_api TO $SUPERTOKENS_USER;
+    GRANT ALL ON ALL FUNCTIONS IN SCHEMA supertokens TO $SUPERTOKENS_USER;
+    ALTER SCHEMA supertokens OWNER TO $SUPERTOKENS_USER;
+    
+  COMMIT;
+
+EOSQL
