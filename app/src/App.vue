@@ -11,7 +11,7 @@ import Passwordless from 'supertokens-web-js/recipe/passwordless'
 
 SuperTokens.init({
     appInfo: {
-        apiDomain: "http://localhost:3000",
+        apiDomain: "http://localhost",
         apiBasePath: "/auth",
         appName: "OpenSociocracy",
     },
