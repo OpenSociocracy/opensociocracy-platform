@@ -1,0 +1,488 @@
+{
+	"info": {
+		"_postman_id": "6608d3fc-e9f3-46f8-a049-7d6f4fdef8b5",
+		"name": "Basic OpenSocioracy Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27760",
+		"_collection_link": "https://ultrinet.postman.co/workspace/OpenSociocracy~91847678-48b8-4506-a363-e2ef05526962/collection/27760-6608d3fc-e9f3-46f8-a049-7d6f4fdef8b5?action=share&creator=27760&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "Basic",
+			"item": [
+				{
+					"name": "API Server up",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"The root of the API server is available\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.root).to.eql(true);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{apiUri}}",
+							"host": [
+								"{{apiUri}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"The root of the API server is available\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"up\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{apiUri}}/health",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API Postgres Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"The root of the API server is available\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"OK\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{apiUri}}/health/postgres",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"health",
+								"postgres"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "API Auth - Request Signup code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Returned status is OK\", function () {",
+									"    jsonData.status == \"OK\"",
+									"});",
+									"",
+									"// Set variables for deviceId and preAuthSessionId so we can use them when submitting the code",
+									"",
+									"pm.environment.set(\"deviceId_1\", jsonData.deviceId);",
+									"pm.environment.set(\"preAuthSessionId_1\", jsonData.preAuthSessionId);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"randoEmail\", pm.variables.replaceIn('{{$randomExampleEmail}}'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{randoEmail}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/auth/signinup/code",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"auth",
+								"signinup",
+								"code"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API Auth - Submit OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Returned status is OK\", function () {",
+									"    jsonData.status == \"OK\"",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"randoEmail\", pm.variables.replaceIn('{{$randomExampleEmail}}'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deviceId\": \"{{deviceId_1}}\",\n    \"preAuthSessionId\": \"{{preAuthSessionId_1}}\",\n    \"userInputCode\": \"903318\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/auth/signinup/code/consume",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"auth",
+								"signinup",
+								"code",
+								"consume"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get Accounts",
+			"item": [
+				{
+					"name": "Get member accounts",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"const accounts = jsonData.accounts;",
+									"",
+									"_.forEach(accounts, function(account) {",
+									"  if(account.personal == false) {",
+									"    pm.environment.set(\"currentAccount\", account.accountUid);",
+									"  }",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/member/accounts",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"member",
+								"accounts"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Organizations",
+			"item": [
+				{
+					"name": "Get Account orgs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Returned status is OK\", function () {",
+									"    jsonData.status == \"OK\"",
+									"});",
+									"",
+									"// Set variables for deviceId and preAuthSessionId so we can use them when submitting the code",
+									"",
+									"pm.environment.set(\"deviceId_1\", jsonData.deviceId);",
+									"pm.environment.set(\"preAuthSessionId_1\", jsonData.preAuthSessionId);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"randoEmail\", pm.variables.replaceIn('{{$randomExampleEmail}}'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{randoEmail}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/accounts/{{currentAccount}}/nuggets?t=organization",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"accounts",
+								"{{currentAccount}}",
+								"nuggets"
+							],
+							"query": [
+								{
+									"key": "t",
+									"value": "organization"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create an Org",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Returned status is OK\", function () {",
+									"    jsonData.status == \"OK\"",
+									"});",
+									"",
+									"// Set variables for deviceId and preAuthSessionId so we can use them when submitting the code",
+									"",
+									"pm.environment.set(\"deviceId_1\", jsonData.deviceId);",
+									"pm.environment.set(\"preAuthSessionId_1\", jsonData.preAuthSessionId);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"randoEmail\", pm.variables.replaceIn('{{$randomExampleEmail}}'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"My Org\",\n    \"nuggetType\": \"organization\",\n    \"accountUid\": \"{{currentAccount}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/nuggets",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"nuggets"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -9,6 +9,7 @@ RUN npm ci --only=production
 FROM node:lts-bullseye-slim
 ENV NODE_ENV production
 COPY --from=build /usr/bin/dumb-init /usr/bin/dumb-init
+RUN npm install --global nodemon
 USER node
 WORKDIR /usr/src/app
 COPY --chown=node:node --from=build /usr/src/app/node_modules /usr/src/app/node_modules

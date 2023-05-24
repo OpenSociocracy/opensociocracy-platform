@@ -1,27 +1,28 @@
 {
-  "name": "fastify-supertokens-example",
+  "name": "opensociocracy-api",
   "version": "1.0.0",
-  "description": "A Fastify example codebase for using supertokens",
+  "description": "OpenSociocracy API",
   "main": "server.js",
   "scripts": {
+    "dev": "nodemon server.js",
     "start": "node server.js",
     "start:debug": "DEBUG=com.supertokens* node server.js",
-    "docker:build": "docker build -t fastify-supertokens-example .",
-    "docker:run": "npm run docker:build && docker run --rm -p 3001:3001 --name fastify-supertokens-example fastify-supertokens-example ",
-    "docker:sh": "docker exec -it fastify-supertokens-example /bin/sh",
+    "docker:build": "docker build -t opensociocracy-api .",
+    "docker:run": "npm run docker:build && docker run --rm -p 3001:3001 --name opensociocracy-api opensociocracy-api ",
+    "docker:sh": "docker exec -it opensociocracy-api /bin/sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lirantal/fastify-supertokens-example.git"
+    "url": "https://github.com/OpenSociocracy/opensociocracy-platform.git"
   },
   "type": "module",
-  "author": "Liran Tal",
-  "license": "Apache-2.0",
+  "author": "Brian Winkers",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lirantal/fastify-supertokens-example/issues"
+    "url": "https://github.com/OpenSociocracy/opensociocracy-platform/issues"
   },
-  "homepage": "https://github.com/lirantal/fastify-supertokens-example#readme",
+  "homepage": "https://github.com/OpenSociocracy/opensociocracy-platform#readme",
   "dependencies": {
     "@fastify/cors": "^8.2.0",
     "@fastify/env": "^4.2.0",
