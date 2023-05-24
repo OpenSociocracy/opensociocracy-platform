@@ -1,6 +1,6 @@
 services:
   postgres:
-    container_name: opensociocracy-pg2
+    container_name: opensociocracy-pg
     hostname: "postgres"
     command: ["postgres", "-c", "log_statement=all"]
     image: "postgres:14"
@@ -22,7 +22,7 @@ services:
 
   redis:
     image: redis:7.0.7
-    container_name: opensociocracy-redis2
+    container_name: opensociocracy-redis
     restart: no
     ports:
       - "6379:6379"
@@ -40,7 +40,7 @@ services:
         condition: service_healthy
     ports:
       - 3567:3567
-    container_name: opensociocracy-supertokens2
+    container_name: opensociocracy-supertokens
     env_file: ".env"
     environment: 
       - POSTGRESQL_TABLE_SCHEMA=supertokens
@@ -55,7 +55,7 @@ services:
       retries: 5
 
   smtp4dev:
-    container_name: opensociocracy-smtp4dev2
+    container_name: opensociocracy-smtp4dev
     image: rnwood/smtp4dev:v3
     restart: no
     env_file: .env
@@ -70,8 +70,8 @@ services:
       - opensociocracy-smtp4dev:/smtp4dev
 
   api:
-    container_name: opensociocracy-api2
-    image: opensociocracy/api2
+    container_name: opensociocracy-api
+    image: opensociocracy/api
     restart: no
     build: ./api
     command: ["npm", "run", "start:debug"]
