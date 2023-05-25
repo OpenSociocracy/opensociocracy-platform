@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 14.7 (Debian 14.7-1.pgdg110+1)
--- Dumped by pg_dump version 14.7 (Ubuntu 14.7-0ubuntu0.22.04.1)
+-- Dumped by pg_dump version 14.8 (Ubuntu 14.8-0ubuntu0.22.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -34,6 +34,18 @@ SET default_table_access_method = heap;
 CREATE TABLE supertokens.all_auth_recipe_users (
     user_id character(36) NOT NULL,
     recipe_id character varying(128) NOT NULL,
+    time_joined bigint NOT NULL
+);
+
+
+--
+-- Name: passwordless_users; Type: TABLE; Schema: supertokens; Owner: -
+--
+
+CREATE TABLE supertokens.passwordless_users (
+    user_id character(36) NOT NULL,
+    email character varying(256),
+    phone_number character varying(256),
     time_joined bigint NOT NULL
 );
 
@@ -152,18 +164,6 @@ CREATE TABLE supertokens.passwordless_devices (
     phone_number character varying(256),
     link_code_salt character(44) NOT NULL,
     failed_attempts integer NOT NULL
-);
-
-
---
--- Name: passwordless_users; Type: TABLE; Schema: supertokens; Owner: -
---
-
-CREATE TABLE supertokens.passwordless_users (
-    user_id character(36) NOT NULL,
-    email character varying(256),
-    phone_number character varying(256),
-    time_joined bigint NOT NULL
 );
 
 
@@ -719,6 +719,181 @@ ALTER TABLE ONLY supertokens.user_roles
 
 ALTER TABLE ONLY supertokens.userid_mapping
     ADD CONSTRAINT userid_mapping_supertokens_user_id_fkey FOREIGN KEY (supertokens_user_id) REFERENCES supertokens.all_auth_recipe_users(user_id) ON DELETE CASCADE;
+
+
+--
+-- Name: SCHEMA supertokens; Type: ACL; Schema: -; Owner: -
+--
+
+GRANT USAGE ON SCHEMA supertokens TO opensociocracy_api;
+
+
+--
+-- Name: TABLE all_auth_recipe_users; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.all_auth_recipe_users TO opensociocracy_api;
+
+
+--
+-- Name: TABLE passwordless_users; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.passwordless_users TO opensociocracy_api;
+
+
+--
+-- Name: TABLE dashboard_user_sessions; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.dashboard_user_sessions TO opensociocracy_api;
+
+
+--
+-- Name: TABLE dashboard_users; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.dashboard_users TO opensociocracy_api;
+
+
+--
+-- Name: TABLE emailpassword_pswd_reset_tokens; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.emailpassword_pswd_reset_tokens TO opensociocracy_api;
+
+
+--
+-- Name: TABLE emailpassword_users; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.emailpassword_users TO opensociocracy_api;
+
+
+--
+-- Name: TABLE emailverification_tokens; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.emailverification_tokens TO opensociocracy_api;
+
+
+--
+-- Name: TABLE emailverification_verified_emails; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.emailverification_verified_emails TO opensociocracy_api;
+
+
+--
+-- Name: TABLE jwt_signing_keys; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.jwt_signing_keys TO opensociocracy_api;
+
+
+--
+-- Name: TABLE key_value; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.key_value TO opensociocracy_api;
+
+
+--
+-- Name: TABLE passwordless_codes; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.passwordless_codes TO opensociocracy_api;
+
+
+--
+-- Name: TABLE passwordless_devices; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.passwordless_devices TO opensociocracy_api;
+
+
+--
+-- Name: TABLE role_permissions; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.role_permissions TO opensociocracy_api;
+
+
+--
+-- Name: TABLE roles; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.roles TO opensociocracy_api;
+
+
+--
+-- Name: TABLE session_access_token_signing_keys; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.session_access_token_signing_keys TO opensociocracy_api;
+
+
+--
+-- Name: TABLE session_info; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.session_info TO opensociocracy_api;
+
+
+--
+-- Name: TABLE thirdparty_users; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.thirdparty_users TO opensociocracy_api;
+
+
+--
+-- Name: TABLE totp_used_codes; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.totp_used_codes TO opensociocracy_api;
+
+
+--
+-- Name: TABLE totp_user_devices; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.totp_user_devices TO opensociocracy_api;
+
+
+--
+-- Name: TABLE totp_users; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.totp_users TO opensociocracy_api;
+
+
+--
+-- Name: TABLE user_last_active; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.user_last_active TO opensociocracy_api;
+
+
+--
+-- Name: TABLE user_metadata; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.user_metadata TO opensociocracy_api;
+
+
+--
+-- Name: TABLE user_roles; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.user_roles TO opensociocracy_api;
+
+
+--
+-- Name: TABLE userid_mapping; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.userid_mapping TO opensociocracy_api;
 
 
 --

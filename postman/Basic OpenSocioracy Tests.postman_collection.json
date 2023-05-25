@@ -250,7 +250,7 @@
 			]
 		},
 		{
-			"name": "Get Accounts",
+			"name": "ACCOUNTS",
 			"item": [
 				{
 					"name": "Get member accounts",
@@ -314,13 +314,78 @@
 							}
 						},
 						"url": {
-							"raw": "{{apiUri}}/member/accounts",
+							"raw": "{{apiUri}}/accounts",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
-								"member",
 								"accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create account",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Returned status is OK\", function () {",
+									"    jsonData.status == \"OK\"",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"My new account\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/account",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"account"
 							]
 						}
 					},
@@ -338,20 +403,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"HTTP Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"var jsonData = pm.response.json();",
-									"",
-									"pm.test(\"Returned status is OK\", function () {",
-									"    jsonData.status == \"OK\"",
-									"});",
-									"",
-									"// Set variables for deviceId and preAuthSessionId so we can use them when submitting the code",
-									"",
-									"pm.environment.set(\"deviceId_1\", jsonData.deviceId);",
-									"pm.environment.set(\"preAuthSessionId_1\", jsonData.preAuthSessionId);"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -360,7 +412,119 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"pm.environment.set(\"randoEmail\", pm.variables.replaceIn('{{$randomExampleEmail}}'));"
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiUri}}/account/{{currentAccount}}/orgs",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"account",
+								"{{currentAccount}}",
+								"orgs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create an Org",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"My Org\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/org",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"org"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "LOGBOOK",
+			"item": [
+				{
+					"name": "Get Org Logbooks",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -393,46 +557,26 @@
 							}
 						},
 						"url": {
-							"raw": "{{apiUri}}/accounts/{{currentAccount}}/nuggets?t=organization",
+							"raw": "{{apiUri}}/logbook/{{logbookUid}}",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
-								"accounts",
-								"{{currentAccount}}",
-								"nuggets"
-							],
-							"query": [
-								{
-									"key": "t",
-									"value": "organization"
-								}
+								"logbook",
+								"{{logbookUid}}"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Create an Org",
+					"name": "Get Logbook entries",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"HTTP Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"var jsonData = pm.response.json();",
-									"",
-									"pm.test(\"Returned status is OK\", function () {",
-									"    jsonData.status == \"OK\"",
-									"});",
-									"",
-									"// Set variables for deviceId and preAuthSessionId so we can use them when submitting the code",
-									"",
-									"pm.environment.set(\"deviceId_1\", jsonData.deviceId);",
-									"pm.environment.set(\"preAuthSessionId_1\", jsonData.preAuthSessionId);"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -441,7 +585,68 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"pm.environment.set(\"randoEmail\", pm.variables.replaceIn('{{$randomExampleEmail}}'));"
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{randoEmail}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/logbook/{{logbookUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"logbook",
+								"{{logbookUid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a Logbook note",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -463,7 +668,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"My Org\",\n    \"nuggetType\": \"organization\",\n    \"accountUid\": \"{{currentAccount}}\"\n}",
+							"raw": "{\n    \"note\": \"This org event happened\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -471,12 +676,641 @@
 							}
 						},
 						"url": {
-							"raw": "{{apiUri}}/nuggets",
+							"raw": "{{apiUri}}/logbook/{{logbookUid}}",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
-								"nuggets"
+								"logbook",
+								"{{logbookUid}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "LOGBOOK NUGGETS",
+			"item": [
+				{
+					"name": "Create a Logbook Nugget",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"note\": \"This org event happened, and I have a nugget of info\",\n    \"nugget\": {\n        \"nuggetType\": \"proposal\",\n        \"pubAt\": \"2023-05-25\",\n        \"internalName\": \"Proposal to recover the parking lot.\",\n        \"publicTitle\": \"Prettier Parking\",\n        \"blocks\": [\n            {\n                \"blockType\": \"standardProposal\",\n                \"data\": {\n\n                }\n            },\n            {\n                \"blockType\": \"slideDeck\",\n                \"data\": {\n                    \n                }\n            },\n            {\n                \"blockType\": \"spreadsheet\",\n                \"data\": {\n                    \n                }\n            }\n        ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/logbook/{{logbookUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"logbook",
+								"{{logbookUid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Logbook Entry Nugget",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiUri}}/nugget/{{nuggetUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"nugget",
+								"{{nuggetUid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update a Logbook Nugget",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"note\": \"This org event happened, and I have a nugget of info\",\n    \"nugget\": {\n        \"nuggetType\": \"proposal\",\n        \"pubAt\": \"2023-05-25\",\n        \"internalName\": \"Proposal to recover the parking lot.\",\n        \"publicTitle\": \"Prettier Parking\",\n        \"blocks\": [\n            {\n                \"blockType\": \"standardProposal\",\n                \"data\": {\n\n                }\n            },\n            {\n                \"blockType\": \"slideDeck\",\n                \"data\": {\n                    \n                }\n            },\n            {\n                \"blockType\": \"spreadsheet\",\n                \"data\": {\n                    \n                }\n            }\n        ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/nugget/{{nuggetUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"nugget",
+								"{{nuggetUid}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "NUGGET REACTIONS",
+			"item": [
+				{
+					"name": "Get Reactions for a Nugget",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiUri}}/reactions/nugget/{{nuggetUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"reactions",
+								"nugget",
+								"{{nuggetUid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create/Update Reaction to a Nugget",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reaction\": \"consent\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/reactions/nugget/{{nuggetUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"reactions",
+								"nugget",
+								"{{nuggetUid}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "NUGGET COMMENTS",
+			"item": [
+				{
+					"name": "Get Comments for a Nugget",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiUri}}/comments/nugget/{{nuggetUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"comments",
+								"nugget",
+								"{{nuggetUid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Comment for a Nugget",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"comment\": \"Cool idea, what will it cost?\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/comment/nugget/{{nuggetUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"comment",
+								"nugget",
+								"{{nuggetUid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Comment for a Nugget",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"comment\": \"Cool idea, thank you. Do we know what will it cost?\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/nugget/{{nuggetUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"nugget",
+								"{{nuggetUid}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "REPLIES TO COMMENTS",
+			"item": [
+				{
+					"name": "Get Replies for a Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiUri}}/reply/comment/{{commentUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"reply",
+								"comment",
+								"{{commentUid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Reply to a Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reply\": \"I know you are, but what am I?\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/reply/comment/{{commentUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"reply",
+								"comment",
+								"{{commentUid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Reply to a Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reply\": \"I second the proposal\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/nugget/{{nuggetUid}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"nugget",
+								"{{nuggetUid}}"
 							]
 						}
 					},
