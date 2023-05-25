@@ -1,4 +1,4 @@
-# OpenSociocracy APp (app)
+# OpenSociocracy App (app)
 
 A Quasar Project
 

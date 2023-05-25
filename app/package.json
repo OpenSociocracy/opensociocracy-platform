@@ -1,8 +1,8 @@
 {
   "name": "app",
   "version": "0.0.1",
-  "description": "A Quasar Project",
-  "productName": "OpenSociocracy APp",
+  "description": "A pragmatic approach to sociocracy",
+  "productName": "OpenSociocracy",
   "author": "Brian Winkers <bwinkers@gmail.com>",
   "private": true,
   "scripts": {

@@ -3,10 +3,13 @@ import fastifyPlugin from "fastify-plugin";
 import { verifySession } from "supertokens-node/recipe/session/framework/fastify/index.js";
 
 async function indexRoutes(server, options) {
-  server.get("/",
+  server.get("/members/dashboard",  {
+    preHandler: verifySession(),
+
+  },
   async (request, reply) => {
     return {
-     root: true,
+     root: 'bhgbuue',
     };
   });
 }
