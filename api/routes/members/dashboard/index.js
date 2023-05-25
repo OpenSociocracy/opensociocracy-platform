@@ -3,9 +3,9 @@ import fastifyPlugin from "fastify-plugin";
 import { verifySession } from "supertokens-node/recipe/session/framework/fastify/index.js";
 
 async function indexRoutes(server, options) {
-  server.get("/", async (request, reply) => {
+  server.get("/members/dashboard", async (request, reply) => {
     return {
-     root: true,
+     root: 'bhgbuue',
     };
   });
 }
