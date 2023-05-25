@@ -514,8 +514,11 @@ ALTER SEQUENCE opensociocracy_api.logbook_id_seq OWNED BY opensociocracy_api.log
 
 CREATE TABLE opensociocracy_api.member (
     id bigint NOT NULL,
-    uid uuid,
-    created_at timestamp without time zone
+    uid uuid DEFAULT gen_random_uuid() NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    full_name character varying(64),
+    platform_username character varying(32),
+    public_profile boolean DEFAULT false NOT NULL
 );
 
 
@@ -722,6 +725,24 @@ CREATE SEQUENCE opensociocracy_api.response_id_seq
 --
 
 ALTER SEQUENCE opensociocracy_api.response_id_seq OWNED BY opensociocracy_api.response.id;
+
+
+--
+-- Name: v_user_member_accounts; Type: VIEW; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE VIEW opensociocracy_api.v_user_member_accounts AS
+ SELECT pu.email,
+    m.uid AS "memberUid",
+    m.created_at AS "createdAt",
+    a.uid AS "accountUid",
+    am.roles,
+    a.personal
+   FROM ((((supertokens.all_auth_recipe_users u
+     JOIN supertokens.passwordless_users pu ON ((pu.user_id = u.user_id)))
+     JOIN opensociocracy_api.member m ON ((m.uid = (u.user_id)::uuid)))
+     JOIN opensociocracy_api.account_member am ON ((am.member_id = m.id)))
+     JOIN opensociocracy_api.account a ON ((a.id = am.account_id)));
 
 
 --
