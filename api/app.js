@@ -6,7 +6,6 @@ import config from "./plugins/config.js";
 import postgres from "./plugins/postgres.js";
 import auth from "./plugins/auth.js";
 import swagger from "./plugins/swagger.js";
-// import indexRoutes from "./routes/index.js";
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -19,7 +18,6 @@ export default async function appFramework() {
   fastify.register(postgres);
   fastify.register(auth);
   fastify.register(swagger);
-  // fastify.register(indexRoutes);
 
   fastify.register(autoLoad, {
     dir: join(__dirname, 'routes')
