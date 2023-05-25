@@ -37,10 +37,10 @@ CREATE TYPE opensociocracy_api.account_roles AS ENUM (
 
 
 --
--- Name: circle_roles; Type: TYPE; Schema: opensociocracy_api; Owner: -
+-- Name: group_roles; Type: TYPE; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE TYPE opensociocracy_api.circle_roles AS ENUM (
+CREATE TYPE opensociocracy_api.group_roles AS ENUM (
     'vetoer',
     'leader',
     'log-keeper',
@@ -366,10 +366,10 @@ CREATE TABLE opensociocracy_api.account (
 
 
 --
--- Name: org_circle; Type: TABLE; Schema: opensociocracy_api; Owner: -
+-- Name: org_group; Type: TABLE; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE TABLE opensociocracy_api.org_circle (
+CREATE TABLE opensociocracy_api.org_group (
     id bigint NOT NULL,
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
@@ -395,7 +395,7 @@ CREATE SEQUENCE opensociocracy_api.account_circle_id_seq
 -- Name: account_circle_id_seq; Type: SEQUENCE OWNED BY; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER SEQUENCE opensociocracy_api.account_circle_id_seq OWNED BY opensociocracy_api.org_circle.id;
+ALTER SEQUENCE opensociocracy_api.account_circle_id_seq OWNED BY opensociocracy_api.org_group.id;
 
 
 --
@@ -630,17 +630,17 @@ ALTER SEQUENCE opensociocracy_api.org_account_id_seq OWNED BY opensociocracy_api
 
 
 --
--- Name: org_circle_member; Type: TABLE; Schema: opensociocracy_api; Owner: -
+-- Name: org_group_member; Type: TABLE; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE TABLE opensociocracy_api.org_circle_member (
+CREATE TABLE opensociocracy_api.org_group_member (
     id bigint NOT NULL,
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    org_circle_id bigint NOT NULL,
+    org_group_id bigint NOT NULL,
     member_email character varying(256),
     member_name character varying(128),
-    circle_role opensociocracy_api.circle_roles[] DEFAULT '{viewing-member}'::opensociocracy_api.circle_roles[] NOT NULL
+    group_role opensociocracy_api.group_roles[] DEFAULT '{viewing-member}'::opensociocracy_api.group_roles[] NOT NULL
 );
 
 
@@ -660,7 +660,7 @@ CREATE SEQUENCE opensociocracy_api.org_circle_member_id_seq
 -- Name: org_circle_member_id_seq; Type: SEQUENCE OWNED BY; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER SEQUENCE opensociocracy_api.org_circle_member_id_seq OWNED BY opensociocracy_api.org_circle_member.id;
+ALTER SEQUENCE opensociocracy_api.org_circle_member_id_seq OWNED BY opensociocracy_api.org_group_member.id;
 
 
 --
@@ -802,17 +802,17 @@ ALTER TABLE ONLY opensociocracy_api.org ALTER COLUMN account_id SET DEFAULT next
 
 
 --
--- Name: org_circle id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
+-- Name: org_group id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_circle ALTER COLUMN id SET DEFAULT nextval('opensociocracy_api.account_circle_id_seq'::regclass);
+ALTER TABLE ONLY opensociocracy_api.org_group ALTER COLUMN id SET DEFAULT nextval('opensociocracy_api.account_circle_id_seq'::regclass);
 
 
 --
--- Name: org_circle_member id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
+-- Name: org_group_member id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_circle_member ALTER COLUMN id SET DEFAULT nextval('opensociocracy_api.org_circle_member_id_seq'::regclass);
+ALTER TABLE ONLY opensociocracy_api.org_group_member ALTER COLUMN id SET DEFAULT nextval('opensociocracy_api.org_circle_member_id_seq'::regclass);
 
 
 --
@@ -823,10 +823,10 @@ ALTER TABLE ONLY opensociocracy_api.response ALTER COLUMN id SET DEFAULT nextval
 
 
 --
--- Name: org_circle account_circle_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: org_group account_circle_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_circle
+ALTER TABLE ONLY opensociocracy_api.org_group
     ADD CONSTRAINT account_circle_pkey PRIMARY KEY (id);
 
 
@@ -895,10 +895,10 @@ ALTER TABLE ONLY opensociocracy_api.reaction
 
 
 --
--- Name: org_circle_member org_circle_member_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: org_group_member org_circle_member_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_circle_member
+ALTER TABLE ONLY opensociocracy_api.org_group_member
     ADD CONSTRAINT org_circle_member_pkey PRIMARY KEY (id);
 
 
@@ -967,34 +967,34 @@ ALTER TABLE ONLY opensociocracy_api.nugget
 
 
 --
--- Name: org_circle_member uq_org_circle_member_circle_member_email; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: org_group_member uq_org_circle_member_circle_member_email; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_circle_member
-    ADD CONSTRAINT uq_org_circle_member_circle_member_email UNIQUE (member_email, org_circle_id);
+ALTER TABLE ONLY opensociocracy_api.org_group_member
+    ADD CONSTRAINT uq_org_circle_member_circle_member_email UNIQUE (member_email, org_group_id);
 
 
 --
--- Name: org_circle_member uq_org_circle_member_uid; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: org_group_member uq_org_circle_member_uid; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_circle_member
+ALTER TABLE ONLY opensociocracy_api.org_group_member
     ADD CONSTRAINT uq_org_circle_member_uid UNIQUE (uid);
 
 
 --
--- Name: org_circle uq_org_circle_org_name; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: org_group uq_org_circle_org_name; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_circle
+ALTER TABLE ONLY opensociocracy_api.org_group
     ADD CONSTRAINT uq_org_circle_org_name UNIQUE (org_id, name);
 
 
 --
--- Name: org_circle uq_org_circle_uid; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: org_group uq_org_circle_uid; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_circle
+ALTER TABLE ONLY opensociocracy_api.org_group
     ADD CONSTRAINT uq_org_circle_uid UNIQUE (uid);
 
 
@@ -1087,18 +1087,18 @@ ALTER TABLE ONLY opensociocracy_api.org
 
 
 --
--- Name: org_circle_member fk_org_circle_member_org_circle_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: org_group_member fk_org_circle_member_org_circle_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_circle_member
-    ADD CONSTRAINT fk_org_circle_member_org_circle_id FOREIGN KEY (org_circle_id) REFERENCES opensociocracy_api.org_circle(id) NOT VALID;
+ALTER TABLE ONLY opensociocracy_api.org_group_member
+    ADD CONSTRAINT fk_org_circle_member_org_circle_id FOREIGN KEY (org_group_id) REFERENCES opensociocracy_api.org_group(id) NOT VALID;
 
 
 --
--- Name: org_circle fk_org_circle_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: org_group fk_org_circle_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_circle
+ALTER TABLE ONLY opensociocracy_api.org_group
     ADD CONSTRAINT fk_org_circle_org_id FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id) NOT VALID;
 
 
@@ -1173,10 +1173,10 @@ GRANT ALL ON TABLE opensociocracy_api.account TO opensociocracy_supertokens;
 
 
 --
--- Name: TABLE org_circle; Type: ACL; Schema: opensociocracy_api; Owner: -
+-- Name: TABLE org_group; Type: ACL; Schema: opensociocracy_api; Owner: -
 --
 
-GRANT ALL ON TABLE opensociocracy_api.org_circle TO opensociocracy_supertokens;
+GRANT ALL ON TABLE opensociocracy_api.org_group TO opensociocracy_supertokens;
 
 
 --
@@ -1285,10 +1285,10 @@ GRANT ALL ON SEQUENCE opensociocracy_api.org_account_id_seq TO opensociocracy_su
 
 
 --
--- Name: TABLE org_circle_member; Type: ACL; Schema: opensociocracy_api; Owner: -
+-- Name: TABLE org_group_member; Type: ACL; Schema: opensociocracy_api; Owner: -
 --
 
-GRANT ALL ON TABLE opensociocracy_api.org_circle_member TO opensociocracy_supertokens;
+GRANT ALL ON TABLE opensociocracy_api.org_group_member TO opensociocracy_supertokens;
 
 
 --
