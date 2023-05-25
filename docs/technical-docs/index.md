@@ -1,5 +1,13 @@
 # OpenSociocracy Technical Documentation
 
+## Database
+
+### Database Functions
+
+The API user only is only allowed to call a set of defined functions. It should never create raw SQL queries.
+
+[Database Functions](/technical-docs/database/functions/)
+
 ## Assets
 
 Assets are inputs.
