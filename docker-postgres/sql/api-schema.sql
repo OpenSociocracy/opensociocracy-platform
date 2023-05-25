@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 14.7 (Debian 14.7-1.pgdg110+1)
--- Dumped by pg_dump version 14.7 (Ubuntu 14.7-0ubuntu0.22.04.1)
+-- Dumped by pg_dump version 14.8 (Ubuntu 14.8-0ubuntu0.22.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -283,25 +283,6 @@ $$;
 
 
 --
--- Name: get_nugget_type_id(character varying, bigint); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
---
-
-CREATE FUNCTION opensociocracy_api.get_nugget_type_id(type_name_in character varying, account_id_in bigint) RETURNS bigint
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-  RETURN (
-  	SELECT id FROM opensociocracy_api.nugget_type WHERE name = 'article' AND ( account_id = account_id_in OR account_id IS NULL )
-	ORDER BY account_id
-	LIMIT 1
-  );
-  
-	
-END; 
-$$;
-
-
---
 -- Name: new_member_from_user(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -325,26 +306,6 @@ BEGIN
 		 
 		 RETURN NEW;
 END;
-$$;
-
-
---
--- Name: register_member(text, text, numeric); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
---
-
-CREATE FUNCTION opensociocracy_api.register_member(uid_in text, email_in text, time_joined_in numeric) RETURNS text
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    
-	INSERT INTO opensociocracy_api.member(uid, email, created_at, last_sign_in)
-	VALUES(uuid(uid_in), email_in,  to_timestamp(time_joined_in/1000), CURRENT_TIMESTAMP)
-	ON CONFLICT (uid) DO UPDATE 
-	SET last_sign_in = CURRENT_TIMESTAMP, email = EXCLUDED.email;
-	
-	RETURN 'OK';
-	
-END; 
 $$;
 
 
