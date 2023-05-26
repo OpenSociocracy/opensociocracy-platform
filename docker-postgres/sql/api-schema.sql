@@ -181,6 +181,40 @@ $_$;
 
 
 --
+-- Name: create_org(character varying, text, uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.create_org(name_in character varying, note_in text, member_uid_in uuid, account_uid_in uuid) RETURNS TABLE("orgId" bigint, "orgUid" uuid, "createdAt" timestamp without time zone, name character varying, "logbookId" bigint, "logbookUid" uuid)
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE new_org_id BIGINT;
+DECLARE new_org_uid uuid;
+DECLARE new_org_created_at timestamp without time zone;
+DECLARE new_logbook_id BIGINT;
+DECLARE new_logbook_uid uuid;
+
+BEGIN
+    
+	INSERT INTO opensociocracy_api.org(name, note, account_id )
+		 VALUES(name_in, note_in, (SELECT a.id FROM opensociocracy_api.account a where a.uid = account_uid_in))
+		 RETURNING opensociocracy_api.org.id, opensociocracy_api.org.uid, opensociocracy_api.org.created_at INTO new_org_id, new_org_uid, new_org_created_at;
+		
+	INSERT INTO opensociocracy_api.logbook(name, org_id)
+		 VALUES(CONCAT('Logbook for Org ', new_org_uid), new_org_id)
+		 RETURNING opensociocracy_api.logbook.id, opensociocracy_api.logbook.uid INTO new_logbook_id, new_logbook_uid;
+		 
+	INSERT INTO opensociocracy_api.logbook_entry(note, logbook_id)
+		 VALUES(CONCAT('Created Logbook Entry in ', new_logbook_uid), new_logbook_id);
+		 
+	RETURN QUERY SELECT new_org_id, new_org_uid, new_org_created_at, name_in, new_logbook_id, new_logbook_uid;
+	
+	
+END; 
+$$;
+
+
+--
 -- Name: get_account_nuggets_by_type(uuid, uuid, text); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -207,6 +241,53 @@ WHERE m.uid = member_uid_in
 AND a.uid = account_uid_in
 AND n.nugget_type = nugget_type_in;
 END;
+$$;
+
+
+--
+-- Name: get_account_orgs(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_account_orgs(member_uid_in uuid, account_uid_in uuid) RETURNS TABLE("orgUid" uuid, "createdAt" timestamp without time zone, name character varying, note text)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT o.uid, o.created_at, o.name, o.note
+	FROM opensociocracy_api.org o 
+	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
+	INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in
+ 	AND a.uid =account_uid_in );
+
+	
+END; 
+$$;
+
+
+--
+-- Name: get_logbook_entries(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_logbook_entries(member_uid_in uuid, logbook_uid_in uuid) RETURNS TABLE("logbookEntryUid" uuid, "createdAt" timestamp without time zone, note text, "nuggetUid" uuid)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT le.uid, le.created_at, le.note, n.uid
+	FROM opensociocracy_api.logbook_entry le
+	LEFT JOIN nugget n ON n.id = le.nugget_id
+    INNER JOIN opensociocracy_api.logbook l ON l.id = le.logbook_id
+	INNER JOIN opensociocracy_api.org o ON o.id = l.org_id
+	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
+	INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in
+ 	AND l.uid = logbook_uid_in );
+
+	
+END; 
 $$;
 
 
@@ -283,6 +364,29 @@ $$;
 
 
 --
+-- Name: get_org_logbooks(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_org_logbooks(member_uid_in uuid, org_uid_in uuid) RETURNS TABLE("logbookUid" uuid, "createdAt" timestamp without time zone, name character varying)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT l.uid, l.created_at, l.name
+	FROM opensociocracy_api.logbook l
+	INNER JOIN opensociocracy_api.org o ON o.id = l.org_id
+	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
+	INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in
+ 	AND o.uid = org_uid_in );
+
+	
+END; 
+$$;
+
+
+--
 -- Name: new_member_from_user(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -335,7 +439,7 @@ CREATE TABLE opensociocracy_api.org_group (
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     name character varying(64) NOT NULL,
-    description text,
+    note text,
     org_id bigint NOT NULL
 );
 
@@ -427,7 +531,7 @@ CREATE TABLE opensociocracy_api.logbook_entry (
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     logbook_id bigint,
     note text,
-    nugget_id bigint NOT NULL
+    nugget_id bigint
 );
 
 
@@ -567,7 +671,9 @@ CREATE TABLE opensociocracy_api.org (
     id bigint NOT NULL,
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    account_id bigint NOT NULL
+    account_id bigint NOT NULL,
+    name character varying(64),
+    note text
 );
 
 

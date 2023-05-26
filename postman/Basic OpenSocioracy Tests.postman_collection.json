@@ -372,7 +372,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"My new account\"\n}",
+							"raw": "{\n    \"name\": \"My new account 2\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -380,12 +380,85 @@
 							}
 						},
 						"url": {
-							"raw": "{{apiUri}}/account",
+							"raw": "{{apiUri}}/accounts",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
-								"account"
+								"accounts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check for new account",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"const accounts = jsonData.accounts;",
+									"",
+									"_.forEach(accounts, function(account) {",
+									"  if(account.personal == false) {",
+									"    pm.environment.set(\"currentAccount\", account.accountUid);",
+									"  }",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/accounts",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"accounts"
 							]
 						}
 					},
@@ -394,7 +467,7 @@
 			]
 		},
 		{
-			"name": "Organizations",
+			"name": "ORGANIZATIONS",
 			"item": [
 				{
 					"name": "Get Account orgs",
@@ -403,6 +476,13 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"const orgs = jsonData.orgs;",
+									"",
+									"_.forEach(orgs, function(org) {",
+									"    pm.environment.set(\"orgUid\", org.orgUid);",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -433,14 +513,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{apiUri}}/account/{{currentAccount}}/orgs",
+							"raw": "{{apiUri}}/orgs/account/{{currentAccount}}",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
+								"orgs",
 								"account",
-								"{{currentAccount}}",
-								"orgs"
+								"{{currentAccount}}"
 							]
 						}
 					},
@@ -453,6 +533,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"const jsonData = pm.response.json();",
+									"pm.environment.set(\"orgUid\", jsonData.orgUid);",
+									"pm.environment.set(\"logbookUid\", jsonData.logbookUid);",
+									"",
 									""
 								],
 								"type": "text/javascript"
@@ -484,7 +568,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"My Org\"\n}",
+							"raw": "{\n    \"name\": \"My Org\",\n    \"note\": \"My fancy new Org\",\n    \"accountUid\": \"{{currentAccount}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -492,12 +576,69 @@
 							}
 						},
 						"url": {
-							"raw": "{{apiUri}}/org",
+							"raw": "{{apiUri}}/orgs",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
-								"org"
+								"orgs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check for new Org",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"const orgs = jsonData.orgs;",
+									"",
+									"_.forEach(orgs, function(org) {",
+									"    pm.environment.set(\"orgUid\", org.orgUid);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiUri}}/orgs/account/{{currentAccount}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"orgs",
+								"account",
+								"{{currentAccount}}"
 							]
 						}
 					},
@@ -515,6 +656,13 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"const logbooks = jsonData.logbooks;",
+									"",
+									"_.forEach(logbooks, function(logbook) {",
+									"    pm.environment.set(\"logbookUid\", logbook.logbookUid);",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -530,9 +678,6 @@
 							}
 						}
 					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [
@@ -547,23 +692,15 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"{{randoEmail}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "{{apiUri}}/logbook/{{logbookUid}}",
+							"raw": "{{apiUri}}/logbooks/org/{{orgUid}}",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
-								"logbook",
-								"{{logbookUid}}"
+								"logbooks",
+								"org",
+								"{{orgUid}}"
 							]
 						}
 					},
@@ -618,13 +755,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{apiUri}}/logbook/{{logbookUid}}",
+							"raw": "{{apiUri}}/logbooks/{{logbookUid}}/entries",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
-								"logbook",
-								"{{logbookUid}}"
+								"logbooks",
+								"{{logbookUid}}",
+								"entries"
 							]
 						}
 					},

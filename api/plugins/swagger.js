@@ -19,11 +19,15 @@ export default fp(async function(server, opts, done) {
         schemes: ['https','http'],
         consumes: ['application/json'],
         produces: ['application/json'],
+        tags: [
+          { name: 'accounts', description: 'Account related endpoints' },
+          { name: 'orgs', description: 'Org related endpoints' }
+        ],
         
       },
 
     uiConfig: {
-      docExpansion: 'full',
+      docExpansion: 'none',
       deepLinking: false 
     },
     uiHooks: {

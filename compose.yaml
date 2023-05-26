@@ -83,6 +83,7 @@ services:
     networks:
       - opensociocracy-net
     volumes:
+      - "./api/services:/usr/src/app/services"
       - "./api/plugins:/usr/src/app/plugins"
       - "./api/routes:/usr/src/app/routes"
       - "./api/app.js:/usr/src/app/app.js"
