@@ -12,6 +12,7 @@ async function healthRoutes(server, options) {
         description:
           "This is an endpoint for application Postgres database health check",
         tags: ["health"],
+        summary: "Verify the database is accessible",
         response: {
           200: {
             description: "Success Response",
