@@ -336,6 +336,29 @@ $$;
 
 
 --
+-- Name: get_org_logbooks(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_org_logbooks(member_uid_in uuid, org_uid_in uuid) RETURNS TABLE("logbookUid" uuid, "createdAt" timestamp without time zone, name character varying)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT l.uid, l.created_at, l.name
+	FROM opensociocracy_api.logbook l
+	INNER JOIN opensociocracy_api.org o ON o.id = l.org_id
+	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
+	INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in
+ 	AND o.uid = org_uid_in );
+
+	
+END; 
+$$;
+
+
+--
 -- Name: new_member_from_user(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 

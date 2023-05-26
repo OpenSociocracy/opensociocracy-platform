@@ -403,6 +403,13 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"const orgs = jsonData.orgs;",
+									"",
+									"_.forEach(orgs, function(org) {",
+									"    pm.environment.set(\"orgUid\", org.orgUid);",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -433,14 +440,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{apiUri}}/account/{{currentAccount}}/orgs",
+							"raw": "{{apiUri}}/orgs/account/{{currentAccount}}",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
+								"orgs",
 								"account",
-								"{{currentAccount}}",
-								"orgs"
+								"{{currentAccount}}"
 							]
 						}
 					},
