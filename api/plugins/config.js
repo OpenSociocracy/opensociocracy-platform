@@ -85,6 +85,9 @@ async function configPlugin(server, options, done) {
       SMTP_SECURE: {
         type: "boolean",
       },
+      API_POSTGRES_URI: {
+        type: "string",
+      }
     },
   };
 

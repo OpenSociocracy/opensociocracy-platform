@@ -5,7 +5,6 @@ import { verifySession } from "supertokens-node/recipe/session/framework/fastify
 async function indexRoutes(server, options) {
   server.get("/members/dashboard",  {
     preHandler: verifySession(),
-
   },
   async (request, reply) => {
     return {
