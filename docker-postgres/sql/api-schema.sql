@@ -203,7 +203,10 @@ BEGIN
 	INSERT INTO opensociocracy_api.logbook(name, org_id)
 		 VALUES(CONCAT('Logbook for Org ', new_org_uid), new_org_id)
 		 RETURNING opensociocracy_api.logbook.id, opensociocracy_api.logbook.uid INTO new_logbook_id, new_logbook_uid;
-
+		 
+	INSERT INTO opensociocracy_api.logbook_entry(note, logbook_id)
+		 VALUES(CONCAT('Created Logbook Entry in ', new_logbook_uid), new_logbook_id);
+		 
 	RETURN QUERY SELECT new_org_id, new_org_uid, new_org_created_at, name_in, new_logbook_id, new_logbook_uid;
 	
 	
@@ -257,6 +260,31 @@ BEGIN
 	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
 	WHERE m.uid = member_uid_in
  	AND a.uid =account_uid_in );
+
+	
+END; 
+$$;
+
+
+--
+-- Name: get_logbook_entries(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_logbook_entries(member_uid_in uuid, logbook_uid_in uuid) RETURNS TABLE("logbookEntryUid" uuid, "createdAt" timestamp without time zone, note text, "nuggetUid" uuid)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT le.uid, le.created_at, le.note, n.uid
+	FROM opensociocracy_api.logbook_entry le
+	JOIN nugget n ON n.id = le.nugget_id
+    INNER JOIN opensociocracy_api.logbook l ON l.id = le.logbook_id
+	INNER JOIN opensociocracy_api.org o ON o.id = l.org_id
+	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
+	INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in
+ 	AND l.uid = logbook_uid_in );
 
 	
 END; 
@@ -503,7 +531,7 @@ CREATE TABLE opensociocracy_api.logbook_entry (
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     logbook_id bigint,
     note text,
-    nugget_id bigint NOT NULL
+    nugget_id bigint
 );
 
 

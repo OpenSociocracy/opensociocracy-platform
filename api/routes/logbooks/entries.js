@@ -1,15 +1,15 @@
 import fastifyPlugin from "fastify-plugin";
 import { verifySession } from "supertokens-node/recipe/session/framework/fastify/index.js";
 
-async function logbookEntryCreateRoutes(server, options) {
+async function logbookEntryRoutes(server, options) {
   server.get(
-    "/logbooks/:logbookUid",
+    "/logbooks/:logbookUid/entries",
     {
       preHandler: verifySession(),
       schema: {
-        description: "Get a logbook",
+        description: "Get entries for a logbook",
         tags: ["logbooks"],
-        summary: "Get a logbook.",
+        summary: "Get a logbook's entries.",
         response: {
           200: {
             description: "Success Response",
@@ -28,13 +28,13 @@ async function logbookEntryCreateRoutes(server, options) {
 
       const logbookUid = req.params.logbookUid;
 
-      const result = await server.logbookService.getLogbook(memberUid, logbookUid);
+      const result = await server.logbookService.getLogbookEntries(memberUid, logbookUid);
 
       return result;
     }
   );
   server.post(
-    "/logbooks/:logbookUid",
+    "/logbooks/:logbookUid/entries",
     {
       preHandler: verifySession(),
       schema: {
@@ -71,6 +71,7 @@ async function logbookEntryCreateRoutes(server, options) {
       return result;
     }
   );
+
 }
 
-export default fastifyPlugin(logbookEntryCreateRoutes);
+export default fastifyPlugin(logbookEntryRoutes);
