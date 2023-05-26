@@ -211,6 +211,28 @@ $$;
 
 
 --
+-- Name: get_account_orgs(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_account_orgs(member_uid_in uuid, account_uid_in uuid) RETURNS TABLE("orgUid" uuid, "createdAt" timestamp without time zone, name character varying, note text)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT o.uid, o.created_at, o.name, o.note
+	FROM opensociocracy_api.org o 
+	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
+	INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in
+ 	AND a.uid =account_uid_in );
+
+	
+END; 
+$$;
+
+
+--
 -- Name: get_member_account(uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -335,7 +357,7 @@ CREATE TABLE opensociocracy_api.org_group (
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     name character varying(64) NOT NULL,
-    description text,
+    note text,
     org_id bigint NOT NULL
 );
 
@@ -567,7 +589,9 @@ CREATE TABLE opensociocracy_api.org (
     id bigint NOT NULL,
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    account_id bigint NOT NULL
+    account_id bigint NOT NULL,
+    name character varying(64),
+    note text
 );
 
 
