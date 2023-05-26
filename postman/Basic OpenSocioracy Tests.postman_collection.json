@@ -380,12 +380,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{apiUri}}/account",
+							"raw": "{{apiUri}}/accounts",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
-								"account"
+								"accounts"
 							]
 						}
 					},
@@ -394,7 +394,7 @@
 			]
 		},
 		{
-			"name": "Organizations",
+			"name": "ORGANIZATIONS",
 			"item": [
 				{
 					"name": "Get Account orgs",
@@ -484,7 +484,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"My Org\"\n}",
+							"raw": "{\n    \"name\": \"My Org\",\n    \"accountUid\": \"025ccbce-00e5-436f-8bba-d5a71dd87d5a\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -492,12 +492,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{apiUri}}/org",
+							"raw": "{{apiUri}}/orgs",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
-								"org"
+								"orgs"
 							]
 						}
 					},
@@ -557,13 +557,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{apiUri}}/logbook/{{logbookUid}}",
+							"raw": "{{apiUri}}/logbooks/org/{{orgUid}}",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
-								"logbook",
-								"{{logbookUid}}"
+								"logbooks",
+								"org",
+								"{{orgUid}}"
 							]
 						}
 					},

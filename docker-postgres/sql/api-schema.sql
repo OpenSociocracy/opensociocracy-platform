@@ -181,6 +181,37 @@ $_$;
 
 
 --
+-- Name: create_org(character varying, text, uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.create_org(name_in character varying, note_in text, member_uid_in uuid, account_uid_in uuid) RETURNS TABLE("orgId" bigint, "orgUid" uuid, "createdAt" timestamp without time zone, name character varying, "logbookId" bigint, "logbookUid" uuid)
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE new_org_id BIGINT;
+DECLARE new_org_uid uuid;
+DECLARE new_org_created_at timestamp without time zone;
+DECLARE new_logbook_id BIGINT;
+DECLARE new_logbook_uid uuid;
+
+BEGIN
+    
+	INSERT INTO opensociocracy_api.org(name, note, account_id )
+		 VALUES(name_in, note_in, (SELECT a.id FROM opensociocracy_api.account a where a.uid = account_uid_in))
+		 RETURNING opensociocracy_api.org.id, opensociocracy_api.org.uid, opensociocracy_api.org.created_at INTO new_org_id, new_org_uid, new_org_created_at;
+		
+	INSERT INTO opensociocracy_api.logbook(name, org_id)
+		 VALUES(CONCAT('Logbook for Org ', new_org_uid), new_org_id)
+		 RETURNING opensociocracy_api.logbook.id, opensociocracy_api.logbook.uid INTO new_logbook_id, new_logbook_uid;
+
+	RETURN QUERY SELECT new_org_id, new_org_uid, new_org_created_at, name_in, new_logbook_id, new_logbook_uid;
+	
+	
+END; 
+$$;
+
+
+--
 -- Name: get_account_nuggets_by_type(uuid, uuid, text); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 

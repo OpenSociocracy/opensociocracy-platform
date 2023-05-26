@@ -16,7 +16,7 @@ async function orgCreateRoutes(server, options) {
             name: {
               type: "string",
               description: "The name for the org",
-            },
+              },
           },
         },
         response: {
@@ -24,9 +24,10 @@ async function orgCreateRoutes(server, options) {
             description: "Success Response",
             type: "object",
             properties: {
-              uid: { type: "string" },
+              orgUid: { type: "string" },
               name: { type: "string" },
-              createdAt: { type: "string" }
+              createdAt: { type: "string" },
+              logbookUid: { type: "string" }
             },
           },
         },

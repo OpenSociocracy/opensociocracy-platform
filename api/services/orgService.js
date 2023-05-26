@@ -23,18 +23,18 @@ const OrgService = (postgres) => {
     }
   };
 
-  const createOrg = async (orgData, authAccountId) => {
+  const createOrg = async (orgData, memberUid) => {
     const client = await postgres.connect();
 
     let query;
     let values;
 
-    query = `SELECT uid, created_at
+    query = `SELECT "orgId", "orgUid" , "createdAt" , name , "logbookId", "logbookUid" 
         FROM create_org(
-          $1, $2
+          $1, $2, $3, $4
       )`;
 
-    values = [orgData.name, authAccountId];
+    values = [orgData.name, orgData.note, memberUid, orgData.accountUid];
 
     try {
       const result = await client.query(query, values);
@@ -43,9 +43,10 @@ const OrgService = (postgres) => {
 
       // Note: avoid doing expensive computation here, this will block releasing the client
       return {
-        uid: newData.uid,
-        createdAt: newData.created_at,
-        name: orgData.name
+        orgUid: newData.orgUid,
+        createdAt: newData.createdAt,
+        name: orgData.name,
+        logbookUid: newData.logbookUid
       };
     } finally {
       // Release the client immediately after query resolves, or upon error
