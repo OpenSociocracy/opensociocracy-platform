@@ -372,7 +372,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"My new account\"\n}",
+							"raw": "{\n    \"name\": \"My new account 2\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -460,6 +460,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"const jsonData = pm.response.json();",
+									"pm.environment.set(\"orgUid\", jsonData.orgUid);",
+									"pm.environment.set(\"logbookUid\", jsonData.logbookUid);",
+									"",
 									""
 								],
 								"type": "text/javascript"
@@ -491,7 +495,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"My Org\",\n    \"accountUid\": \"025ccbce-00e5-436f-8bba-d5a71dd87d5a\"\n}",
+							"raw": "{\n    \"name\": \"My Org\",\n    \"note\": \"My fancy new Org\",\n    \"accountUid\": \"{{currentAccount}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -522,6 +526,13 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"const logbooks = jsonData.logbooks;",
+									"",
+									"_.forEach(logbooks, function(logbook) {",
+									"    pm.environment.set(\"logbookUid\", logbook.logbookUid);",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -537,9 +548,6 @@
 							}
 						}
 					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "GET",
 						"header": [
@@ -554,15 +562,6 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"{{randoEmail}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
 							"raw": "{{apiUri}}/logbooks/org/{{orgUid}}",
 							"host": [
@@ -626,12 +625,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{apiUri}}/logbook/{{logbookUid}}",
+							"raw": "{{apiUri}}/logbooks/{{logbookUid}}",
 							"host": [
 								"{{apiUri}}"
 							],
 							"path": [
-								"logbook",
+								"logbooks",
 								"{{logbookUid}}"
 							]
 						}

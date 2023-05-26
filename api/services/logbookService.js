@@ -1,7 +1,6 @@
 import fp from "fastify-plugin";
 
 const LogbookService = (postgres) => {
-  console.log("LogbookService", postgres);
 
   const getOrgLogbooks = async (memberUid, orgUid) => {
     const client = await postgres.connect();
@@ -54,7 +53,27 @@ const LogbookService = (postgres) => {
     }
   };
 
-  return { getOrgLogbooks, createLogbook };
+  const getLogbookEntries = async (memberUid, logbookUid) => {
+    const client = await postgres.connect();
+
+    try {
+      const {
+        rows,
+      } = await client.query(
+        ` SELECT *
+        FROM get_logbook_entries($1, $2)`,
+        [memberUid, logbookUid]
+      );
+
+      // Note: avoid doing expensive computation here, this will block releasing the client
+      return rows;
+    } finally {
+      // Release the client immediately after query resolves, or upon error
+      client.release();
+    }
+  }
+
+  return { getOrgLogbooks, createLogbook, getLogbookEntries };
 };
 
 export default fp((server, options, next) => {
