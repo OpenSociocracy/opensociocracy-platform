@@ -15,9 +15,7 @@ async function logbookEntryRoutes(server, options) {
             description: "Success Response",
             type: "object",
             properties: {
-              logbookEntryUid: { type: "string" },
-              createdAt: { type: "string" },
-              nuggetUid: { type: "string" }
+              logbookEntries: { type: "array" },
             },
           },
         },
@@ -29,6 +27,8 @@ async function logbookEntryRoutes(server, options) {
       const logbookUid = req.params.logbookUid;
 
       const result = await server.logbookService.getLogbookEntries(memberUid, logbookUid);
+
+      console.log('ROUTER RESULT', result)
 
       return result;
     }

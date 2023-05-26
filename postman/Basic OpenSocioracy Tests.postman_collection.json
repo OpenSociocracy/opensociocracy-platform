@@ -390,6 +390,79 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Check for new account",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"const accounts = jsonData.accounts;",
+									"",
+									"_.forEach(accounts, function(account) {",
+									"  if(account.personal == false) {",
+									"    pm.environment.set(\"currentAccount\", account.accountUid);",
+									"  }",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/accounts",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"accounts"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -509,6 +582,63 @@
 							],
 							"path": [
 								"orgs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check for new Org",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"const orgs = jsonData.orgs;",
+									"",
+									"_.forEach(orgs, function(org) {",
+									"    pm.environment.set(\"orgUid\", org.orgUid);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{apiUri}}/orgs/account/{{currentAccount}}",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"orgs",
+								"account",
+								"{{currentAccount}}"
 							]
 						}
 					},

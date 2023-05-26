@@ -65,8 +65,10 @@ const LogbookService = (postgres) => {
         [memberUid, logbookUid]
       );
 
+      console.log('SERVICE RESULT', rows)
+
       // Note: avoid doing expensive computation here, this will block releasing the client
-      return rows;
+      return { logbookEntries: rows };
     } finally {
       // Release the client immediately after query resolves, or upon error
       client.release();

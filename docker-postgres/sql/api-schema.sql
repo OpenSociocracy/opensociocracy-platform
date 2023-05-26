@@ -277,7 +277,7 @@ BEGIN
 	
 	RETURN QUERY (SELECT le.uid, le.created_at, le.note, n.uid
 	FROM opensociocracy_api.logbook_entry le
-	JOIN nugget n ON n.id = le.nugget_id
+	LEFT JOIN nugget n ON n.id = le.nugget_id
     INNER JOIN opensociocracy_api.logbook l ON l.id = le.logbook_id
 	INNER JOIN opensociocracy_api.org o ON o.id = l.org_id
 	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
