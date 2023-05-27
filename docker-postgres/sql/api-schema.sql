@@ -87,6 +87,26 @@ CREATE TYPE opensociocracy_api.nugget_types AS ENUM (
 
 
 --
+-- Name: account_by_role(uuid, uuid, opensociocracy_api.account_roles); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.account_by_role(member_uid_in uuid, account_uid_in uuid, role_in opensociocracy_api.account_roles) RETURNS TABLE(id bigint, uid uuid)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT a.id, a.uid
+		FROM opensociocracy_api.account a
+		INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+		INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+		WHERE m.uid =  member_uid_in
+		AND a.uid = account_uid_in
+		AND role_in = ANY(am.roles));	
+END; 
+$$;
+
+
+--
 -- Name: create_account(character varying, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -197,7 +217,11 @@ DECLARE new_logbook_uid uuid;
 BEGIN
     
 	INSERT INTO opensociocracy_api.org(name, note, account_id )
-		 VALUES(name_in, note_in, (SELECT a.id FROM opensociocracy_api.account a where a.uid = account_uid_in))
+		 VALUES(name_in, note_in, (SELECT id from opensociocracy_api.account_by_role(
+			member_uid_in, 
+			account_uid_in, 
+			'owner'
+		)))
 		 RETURNING opensociocracy_api.org.id, opensociocracy_api.org.uid, opensociocracy_api.org.created_at INTO new_org_id, new_org_uid, new_org_created_at;
 		
 	INSERT INTO opensociocracy_api.logbook(name, org_id)
@@ -792,24 +816,6 @@ CREATE SEQUENCE opensociocracy_api.response_id_seq
 --
 
 ALTER SEQUENCE opensociocracy_api.response_id_seq OWNED BY opensociocracy_api.response.id;
-
-
---
--- Name: v_user_member_accounts; Type: VIEW; Schema: opensociocracy_api; Owner: -
---
-
-CREATE VIEW opensociocracy_api.v_user_member_accounts AS
- SELECT pu.email,
-    m.uid AS "memberUid",
-    m.created_at AS "createdAt",
-    a.uid AS "accountUid",
-    am.roles,
-    a.personal
-   FROM ((((supertokens.all_auth_recipe_users u
-     JOIN supertokens.passwordless_users pu ON ((pu.user_id = u.user_id)))
-     JOIN opensociocracy_api.member m ON ((m.uid = (u.user_id)::uuid)))
-     JOIN opensociocracy_api.account_member am ON ((am.member_id = m.id)))
-     JOIN opensociocracy_api.account a ON ((a.id = am.account_id)));
 
 
 --
