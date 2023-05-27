@@ -479,6 +479,202 @@
 					]
 				},
 				{
+					"name": "ORGANIZATIONS",
+					"item": [
+						{
+							"name": "Get Account orgs",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"",
+											"const orgs = jsonData.orgs;",
+											"",
+											"_.forEach(orgs, function(org) {",
+											"    pm.environment.set(\"orgUid\", org.orgUid);",
+											"});",
+											"",
+											"pm.test(\"No orgs found yet, as expected\", function () {",
+											"    pm.expect(orgs.length).to.be.eq(0);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "rid",
+										"value": "passwordless",
+										"type": "text"
+									},
+									{
+										"key": "st-auth-mode",
+										"value": "cookie",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{apiUri}}/orgs/account/{{currentAccount}}",
+									"host": [
+										"{{apiUri}}"
+									],
+									"path": [
+										"orgs",
+										"account",
+										"{{currentAccount}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create an Org",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"pm.environment.set(\"orgUid\", jsonData.orgUid);",
+											"pm.environment.set(\"logbookUid\", jsonData.logbookUid);",
+											"",
+											"pm.test(\"Response is valid shape\", function () {",
+											"    pm.expect(jsonData.orgUid).to.exist;",
+											"    pm.expect(jsonData.name).to.exist;",
+											"    pm.expect(jsonData.createdAt).to.exist;",
+											"    pm.expect(jsonData.logbookUid).to.exist;",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "rid",
+										"value": "passwordless",
+										"type": "text"
+									},
+									{
+										"key": "st-auth-mode",
+										"value": "cookie",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"My Org\",\n    \"note\": \"My fancy new Org\",\n    \"accountUid\": \"{{currentAccount}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{apiUri}}/orgs",
+									"host": [
+										"{{apiUri}}"
+									],
+									"path": [
+										"orgs"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Check for new Org",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const jsonData = pm.response.json();",
+											"",
+											"const orgs = jsonData.orgs;",
+											"",
+											"_.forEach(orgs, function(org) {",
+											"    pm.environment.set(\"orgUid\", org.orgUid);",
+											"});",
+											"",
+											"",
+											"pm.test(\"No orgs found yet, as expected\", function () {",
+											"    pm.expect(orgs.length).to.be.gt(0);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "rid",
+										"value": "passwordless",
+										"type": "text"
+									},
+									{
+										"key": "st-auth-mode",
+										"value": "cookie",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{apiUri}}/orgs/account/{{currentAccount}}",
+									"host": [
+										"{{apiUri}}"
+									],
+									"path": [
+										"orgs",
+										"account",
+										"{{currentAccount}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "LOGBOOK",
 					"item": [
 						{
@@ -666,186 +862,6 @@
 										"logbooks",
 										"{{logbookUid}}",
 										"entries"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "ORGANIZATIONS",
-					"item": [
-						{
-							"name": "Get Account orgs",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"const jsonData = pm.response.json();",
-											"",
-											"const orgs = jsonData.orgs;",
-											"",
-											"_.forEach(orgs, function(org) {",
-											"    pm.environment.set(\"orgUid\", org.orgUid);",
-											"});",
-											""
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "rid",
-										"value": "passwordless",
-										"type": "text"
-									},
-									{
-										"key": "st-auth-mode",
-										"value": "cookie",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{apiUri}}/orgs/account/{{currentAccount}}",
-									"host": [
-										"{{apiUri}}"
-									],
-									"path": [
-										"orgs",
-										"account",
-										"{{currentAccount}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create an Org",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"const jsonData = pm.response.json();",
-											"pm.environment.set(\"orgUid\", jsonData.orgUid);",
-											"pm.environment.set(\"logbookUid\", jsonData.logbookUid);",
-											"",
-											""
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "rid",
-										"value": "passwordless",
-										"type": "text"
-									},
-									{
-										"key": "st-auth-mode",
-										"value": "cookie",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"name\": \"My Org\",\n    \"note\": \"My fancy new Org\",\n    \"accountUid\": \"{{currentAccount}}\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{apiUri}}/orgs",
-									"host": [
-										"{{apiUri}}"
-									],
-									"path": [
-										"orgs"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Check for new Org",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"const jsonData = pm.response.json();",
-											"",
-											"const orgs = jsonData.orgs;",
-											"",
-											"_.forEach(orgs, function(org) {",
-											"    pm.environment.set(\"orgUid\", org.orgUid);",
-											"});",
-											""
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "rid",
-										"value": "passwordless",
-										"type": "text"
-									},
-									{
-										"key": "st-auth-mode",
-										"value": "cookie",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{apiUri}}/orgs/account/{{currentAccount}}",
-									"host": [
-										"{{apiUri}}"
-									],
-									"path": [
-										"orgs",
-										"account",
-										"{{currentAccount}}"
 									]
 								}
 							},
