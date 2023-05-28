@@ -59,12 +59,11 @@ const LogbookService = (postgres) => {
     let query;
     let values;
 
-    query = `SELECT "logbookId", "logbookUid" , "createdAt" , name , "logbookId", "logbookUid" 
+    query = `SELECT "logbookEntryId", "logbookEntryUid" , "createdAt"
         FROM create_logbook_entry(
           $1, $2, $3, $4
       )`;
-
-    values = [logbookEntryData.name, logbookEntryData.note, memberUid, logbookEntryData.orgUid];
+    values = [memberUid, logbookEntryData.logbookUid, logbookEntryData.nuggetUid, logbookEntryData.note];
 
     try {
       const result = await client.query(query, values);

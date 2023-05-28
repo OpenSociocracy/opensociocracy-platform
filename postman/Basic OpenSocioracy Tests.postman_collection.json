@@ -364,6 +364,7 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
+											"pm.environment.set(\"randAcctName\", 'ACCT ' + pm.variables.replaceIn('{{$randomCompanyName}}'));",
 											""
 										],
 										"type": "text/javascript"
@@ -386,7 +387,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"My new account 2\"\n}",
+									"raw": "{\n    \"name\": \"{{randAcctName}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -569,7 +570,8 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											""
+											"pm.environment.set(\"randOrgName\", pm.variables.replaceIn('{{$randomCompanyName}}'));",
+											"pm.environment.set(\"randOrgBlurb\", pm.variables.replaceIn('{{$randomBs}}'));"
 										],
 										"type": "text/javascript"
 									}
@@ -591,7 +593,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"My Org\",\n    \"note\": \"My fancy new Org\",\n    \"accountUid\": \"{{currentAccount}}\"\n}",
+									"raw": "{\n    \"name\": \"{{randOrgName}}\",\n    \"note\": \"{{randOrgBlurb}}\",\n    \"accountUid\": \"{{currentAccount}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
