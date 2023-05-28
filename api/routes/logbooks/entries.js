@@ -66,7 +66,7 @@ async function logbookEntryRoutes(server, options) {
     async (req, reply) => {
       let userId = req.session.getUserId();
 
-      const result = await server.logbookService.createLogbook(req.body, userId);
+      const result = await server.logbookService.createLogbookEntry(req.body, userId);
 
       return result;
     }

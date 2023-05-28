@@ -8,6 +8,8 @@ The API user only is only allowed to call a set of defined functions. It should 
 
 [Database Functions](/technical-docs/database/functions/)
 
+[Local Database Backups](/local-db-backups/)
+
 ## Assets
 
 Assets are inputs.

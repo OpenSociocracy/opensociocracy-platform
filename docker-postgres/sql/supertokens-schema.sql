@@ -28,17 +28,6 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: all_auth_recipe_users; Type: TABLE; Schema: supertokens; Owner: -
---
-
-CREATE TABLE supertokens.all_auth_recipe_users (
-    user_id character(36) NOT NULL,
-    recipe_id character varying(128) NOT NULL,
-    time_joined bigint NOT NULL
-);
-
-
---
 -- Name: passwordless_users; Type: TABLE; Schema: supertokens; Owner: -
 --
 
@@ -46,6 +35,17 @@ CREATE TABLE supertokens.passwordless_users (
     user_id character(36) NOT NULL,
     email character varying(256),
     phone_number character varying(256),
+    time_joined bigint NOT NULL
+);
+
+
+--
+-- Name: all_auth_recipe_users; Type: TABLE; Schema: supertokens; Owner: -
+--
+
+CREATE TABLE supertokens.all_auth_recipe_users (
+    user_id character(36) NOT NULL,
+    recipe_id character varying(128) NOT NULL,
     time_joined bigint NOT NULL
 );
 
@@ -729,17 +729,17 @@ GRANT USAGE ON SCHEMA supertokens TO opensociocracy_api;
 
 
 --
--- Name: TABLE all_auth_recipe_users; Type: ACL; Schema: supertokens; Owner: -
---
-
-GRANT ALL ON TABLE supertokens.all_auth_recipe_users TO opensociocracy_api;
-
-
---
 -- Name: TABLE passwordless_users; Type: ACL; Schema: supertokens; Owner: -
 --
 
 GRANT ALL ON TABLE supertokens.passwordless_users TO opensociocracy_api;
+
+
+--
+-- Name: TABLE all_auth_recipe_users; Type: ACL; Schema: supertokens; Owner: -
+--
+
+GRANT ALL ON TABLE supertokens.all_auth_recipe_users TO opensociocracy_api;
 
 
 --

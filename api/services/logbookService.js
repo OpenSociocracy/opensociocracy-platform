@@ -53,6 +53,36 @@ const LogbookService = (postgres) => {
     }
   };
 
+  const createLogbookEntry = async (logbookEntryData, memberUid) => {
+    const client = await postgres.connect();
+
+    let query;
+    let values;
+
+    query = `SELECT "logbookEntryId", "logbookEntryUid" , "createdAt"
+        FROM create_logbook_entry(
+          $1, $2, $3, $4
+      )`;
+    values = [memberUid, logbookEntryData.logbookUid, logbookEntryData.nuggetUid, logbookEntryData.note];
+
+    try {
+      const result = await client.query(query, values);
+
+      const newData = result.rows[0];
+
+      // Note: avoid doing expensive computation here, this will block releasing the client
+      return {
+        logbookUid: newData.logbookUid,
+        createdAt: newData.createdAt,
+        name: logbookEntryData.name,
+        logbookUid: newData.logbookUid
+      };
+    } finally {
+      // Release the client immediately after query resolves, or upon error
+      client.release();
+    }
+  };
+
   const getLogbookEntries = async (memberUid, logbookUid) => {
     const client = await postgres.connect();
 
@@ -75,7 +105,7 @@ const LogbookService = (postgres) => {
     }
   }
 
-  return { getOrgLogbooks, createLogbook, getLogbookEntries };
+  return { getOrgLogbooks, createLogbook, createLogbookEntry, getLogbookEntries };
 };
 
 export default fp((server, options, next) => {
