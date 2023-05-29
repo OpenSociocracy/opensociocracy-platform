@@ -180,13 +180,8 @@ BEGIN
     
 	INSERT INTO opensociocracy_api.logbook_entry(logbook_id, nugget_id, note)
 		 VALUES(
-			(SELECT id from opensociocracy_api.logbook_keeper(
-			   member_uid_in, 
-			   logbook_uid_in)),
-		    (SELECT id from opensociocracy_api.nugget_by_org(
-			   member_uid_in, 
-			   logbook_uid_in, 
-			   'logbook-keeper')),
+			(SELECT id FROM logbook_by_member(member_uid_in, logbook_uid_in)),
+		    (SELECT id FROM nugget WHERE uid = nugget_uid_in),
 		     note_in)
 		 RETURNING opensociocracy_api.logbook_entry.id, opensociocracy_api.logbook_entry.uid, opensociocracy_api.logbook_entry.created_at INTO new_record_id, new_record_uid, new_record_created_at;
 		
@@ -440,6 +435,29 @@ BEGIN
  	AND o.uid = org_uid_in );
 
 	
+END; 
+$$;
+
+
+--
+-- Name: logbook_by_member(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.logbook_by_member(member_uid_in uuid, logbook_uid_in uuid) RETURNS TABLE(id bigint)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT l.id
+					FROM logbook l
+					JOIN org o ON o.id = l.org_id
+					JOIN org_member om ON om.org_id = o.id
+					JOIN account a ON a.id = o.account_id
+					JOIN account_member am ON am.account_id = a.id
+					JOIN member m ON m.id = am.member_id
+					WHERE l.uid = logbook_uid_in
+					AND m.uid = member_uid_in
+					AND (om.role = ANY('{"owner","leader"}') OR  'owner' = ANY(am.roles)));	
 END; 
 $$;
 

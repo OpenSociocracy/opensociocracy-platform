@@ -32,10 +32,12 @@ CREATE VIEW reporting.v_org_members AS
     o.name AS "orgName",
     om.role,
     m.uid AS "memberUid",
-    u.email
-   FROM (((opensociocracy_api.org o
+    u.email,
+    l.uid AS "logbookUid"
+   FROM ((((opensociocracy_api.org o
      LEFT JOIN opensociocracy_api.org_member om ON ((om.org_id = o.id)))
      LEFT JOIN opensociocracy_api.member m ON ((m.id = om.member_id)))
+     LEFT JOIN opensociocracy_api.logbook l ON ((l.org_id = o.id)))
      LEFT JOIN supertokens.passwordless_users u ON (((u.user_id)::uuid = m.uid)));
 
 
