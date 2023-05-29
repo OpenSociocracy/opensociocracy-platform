@@ -664,7 +664,8 @@ CREATE TABLE opensociocracy_api.nugget (
     internal_name character varying(75),
     blocks jsonb DEFAULT '{}'::jsonb,
     nugget_type opensociocracy_api.nugget_types DEFAULT 'json'::opensociocracy_api.nugget_types NOT NULL,
-    org_id bigint NOT NULL
+    org_id bigint,
+    account_id bigint NOT NULL
 );
 
 
