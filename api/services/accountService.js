@@ -34,7 +34,7 @@ const AccountService = (postgres) => {
           $1, $2
       )`;
 
-    values = [accountData.name, authMemberId];
+    values = [authMemberId, accountData.name];
 
     try {
       const result = await client.query(query, values);

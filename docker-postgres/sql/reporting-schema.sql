@@ -28,16 +28,15 @@ CREATE SCHEMA reporting;
 --
 
 CREATE VIEW reporting.v_org_members AS
- SELECT a.uid AS accountuid,
-    o.name AS orgname,
-    og.name AS "groupName",
-    ogm.member_email AS "memberEmail",
-    pu.user_id AS "memberUid"
-   FROM ((((opensociocracy_api.account a
-     JOIN opensociocracy_api.org o ON ((o.account_id = a.id)))
-     LEFT JOIN opensociocracy_api.org_group og ON ((og.org_id = o.id)))
-     LEFT JOIN opensociocracy_api.org_group_member ogm ON ((ogm.org_group_id = og.id)))
-     LEFT JOIN supertokens.passwordless_users pu ON (((pu.email)::text = (ogm.member_email)::text)));
+ SELECT o.uid AS "orgUid",
+    o.name AS "orgName",
+    om.role,
+    m.uid AS "memberUid",
+    u.email
+   FROM (((opensociocracy_api.org o
+     LEFT JOIN opensociocracy_api.org_member om ON ((om.org_id = o.id)))
+     LEFT JOIN opensociocracy_api.member m ON ((m.id = om.member_id)))
+     LEFT JOIN supertokens.passwordless_users u ON (((u.user_id)::uuid = m.uid)));
 
 
 --
