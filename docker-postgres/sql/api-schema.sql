@@ -73,6 +73,17 @@ CREATE TYPE opensociocracy_api.nugget_types AS ENUM (
 
 
 --
+-- Name: org_roles; Type: TYPE; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TYPE opensociocracy_api.org_roles AS ENUM (
+    'owner',
+    'leader',
+    'participant'
+);
+
+
+--
 -- Name: account_by_role(uuid, uuid, opensociocracy_api.account_roles); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -93,10 +104,10 @@ $$;
 
 
 --
--- Name: create_account(character varying, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+-- Name: create_account(uuid, character varying); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.create_account(name_in character varying, owner_uid uuid) RETURNS TABLE(id bigint, uid uuid, created_at timestamp without time zone)
+CREATE FUNCTION opensociocracy_api.create_account(owner_uid uuid, name_in character varying) RETURNS TABLE(id bigint, uid uuid, created_at timestamp without time zone)
     LANGUAGE plpgsql
     AS $$
 
@@ -169,14 +180,8 @@ BEGIN
     
 	INSERT INTO opensociocracy_api.logbook_entry(logbook_id, nugget_id, note)
 		 VALUES(
-			(SELECT id from opensociocracy_api.logbook_by_org_role(
-			   member_uid_in, 
-			   logbook_uid_in, 
-			   'logbook-keeper')),
-		    (SELECT id from opensociocracy_api.nugget_by_org_role(
-			   member_uid_in, 
-			   logbook_uid_in, 
-			   'logbook-keeper')),
+			(SELECT id FROM logbook_by_member(member_uid_in, logbook_uid_in)),
+		    (SELECT id FROM nugget WHERE uid = nugget_uid_in),
 		     note_in)
 		 RETURNING opensociocracy_api.logbook_entry.id, opensociocracy_api.logbook_entry.uid, opensociocracy_api.logbook_entry.created_at INTO new_record_id, new_record_uid, new_record_created_at;
 		
@@ -222,17 +227,17 @@ $_$;
 
 
 --
--- Name: create_org(character varying, text, uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+-- Name: create_org(uuid, uuid, character varying, text); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.create_org(name_in character varying, note_in text, member_uid_in uuid, account_uid_in uuid) RETURNS TABLE("orgId" bigint, "orgUid" uuid, "createdAt" timestamp without time zone, name character varying, "logbookId" bigint, "logbookUid" uuid)
+CREATE FUNCTION opensociocracy_api.create_org(member_uid_in uuid, account_uid_in uuid, name_in character varying, note_in text) RETURNS TABLE("orgId" bigint, "orgUid" uuid, "createdAt" timestamp without time zone, name character varying, "logbookId" bigint, "logbookUid" uuid)
     LANGUAGE plpgsql
     AS $$
 
-DECLARE new_org_id BIGINT;
+DECLARE new_org_id bigint;
 DECLARE new_org_uid uuid;
 DECLARE new_org_created_at timestamp without time zone;
-DECLARE new_logbook_id BIGINT;
+DECLARE new_logbook_id bigint;
 DECLARE new_logbook_uid uuid;
 
 BEGIN
@@ -244,13 +249,16 @@ BEGIN
 			'owner'
 		)))
 		 RETURNING opensociocracy_api.org.id, opensociocracy_api.org.uid, opensociocracy_api.org.created_at INTO new_org_id, new_org_uid, new_org_created_at;
+		 
+    INSERT INTO opensociocracy_api.org_member(member_id, org_id, role)
+		 VALUES((SELECT id FROM opensociocracy_api.member m WHERE m.uid = member_uid_in), new_org_id, 'owner');
 		
 	INSERT INTO opensociocracy_api.logbook(name, org_id)
-		 VALUES(CONCAT('Logbook for Org ', new_org_uid), new_org_id)
+		 VALUES(CONCAT('Logbook for ', name_in), new_org_id)
 		 RETURNING opensociocracy_api.logbook.id, opensociocracy_api.logbook.uid INTO new_logbook_id, new_logbook_uid;
 		 
 	INSERT INTO opensociocracy_api.logbook_entry(note, logbook_id)
-		 VALUES(CONCAT('Created Logbook Entry in ', new_logbook_uid), new_logbook_id);
+		 VALUES(CONCAT('Created logbook entry in ', new_logbook_uid), new_logbook_id);
 		 
 	RETURN QUERY SELECT new_org_id, new_org_uid, new_org_created_at, name_in, new_logbook_id, new_logbook_uid;
 	
@@ -432,6 +440,29 @@ $$;
 
 
 --
+-- Name: logbook_by_member(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.logbook_by_member(member_uid_in uuid, logbook_uid_in uuid) RETURNS TABLE(id bigint)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT l.id
+					FROM logbook l
+					JOIN org o ON o.id = l.org_id
+					JOIN org_member om ON om.org_id = o.id
+					JOIN account a ON a.id = o.account_id
+					JOIN account_member am ON am.account_id = a.id
+					JOIN member m ON m.id = am.member_id
+					WHERE l.uid = logbook_uid_in
+					AND m.uid = member_uid_in
+					AND (om.role = ANY('{"owner","leader"}') OR  'owner' = ANY(am.roles)));	
+END; 
+$$;
+
+
+--
 -- Name: new_member_from_user(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -473,39 +504,6 @@ CREATE TABLE opensociocracy_api.account (
     name character varying(150),
     personal boolean DEFAULT true
 );
-
-
---
--- Name: org_group; Type: TABLE; Schema: opensociocracy_api; Owner: -
---
-
-CREATE TABLE opensociocracy_api.org_group (
-    id bigint NOT NULL,
-    uid uuid DEFAULT gen_random_uuid() NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    name character varying(64) NOT NULL,
-    note text,
-    org_id bigint NOT NULL
-);
-
-
---
--- Name: account_circle_id_seq; Type: SEQUENCE; Schema: opensociocracy_api; Owner: -
---
-
-CREATE SEQUENCE opensociocracy_api.account_circle_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: account_circle_id_seq; Type: SEQUENCE OWNED BY; Schema: opensociocracy_api; Owner: -
---
-
-ALTER SEQUENCE opensociocracy_api.account_circle_id_seq OWNED BY opensociocracy_api.org_group.id;
 
 
 --
@@ -742,40 +740,6 @@ ALTER SEQUENCE opensociocracy_api.org_account_id_seq OWNED BY opensociocracy_api
 
 
 --
--- Name: org_group_member; Type: TABLE; Schema: opensociocracy_api; Owner: -
---
-
-CREATE TABLE opensociocracy_api.org_group_member (
-    id bigint NOT NULL,
-    uid uuid DEFAULT gen_random_uuid() NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    org_group_id bigint NOT NULL,
-    member_email character varying(256),
-    member_name character varying(128),
-    roles bigint[]
-);
-
-
---
--- Name: org_circle_member_id_seq; Type: SEQUENCE; Schema: opensociocracy_api; Owner: -
---
-
-CREATE SEQUENCE opensociocracy_api.org_circle_member_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: org_circle_member_id_seq; Type: SEQUENCE OWNED BY; Schema: opensociocracy_api; Owner: -
---
-
-ALTER SEQUENCE opensociocracy_api.org_circle_member_id_seq OWNED BY opensociocracy_api.org_group_member.id;
-
-
---
 -- Name: org_id_seq; Type: SEQUENCE; Schema: opensociocracy_api; Owner: -
 --
 
@@ -795,37 +759,15 @@ ALTER SEQUENCE opensociocracy_api.org_id_seq OWNED BY opensociocracy_api.org.id;
 
 
 --
--- Name: org_roles; Type: TABLE; Schema: opensociocracy_api; Owner: -
+-- Name: org_member; Type: TABLE; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE TABLE opensociocracy_api.org_roles (
-    id bigint NOT NULL,
-    uid uuid DEFAULT gen_random_uuid() NOT NULL,
+CREATE TABLE opensociocracy_api.org_member (
+    org_id bigint NOT NULL,
+    member_id bigint NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    name character varying(64),
-    description text,
-    org_id bigint,
-    perms jsonb
+    role opensociocracy_api.org_roles DEFAULT 'participant'::opensociocracy_api.org_roles NOT NULL
 );
-
-
---
--- Name: org_roles_id_seq; Type: SEQUENCE; Schema: opensociocracy_api; Owner: -
---
-
-CREATE SEQUENCE opensociocracy_api.org_roles_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: org_roles_id_seq; Type: SEQUENCE OWNED BY; Schema: opensociocracy_api; Owner: -
---
-
-ALTER SEQUENCE opensociocracy_api.org_roles_id_seq OWNED BY opensociocracy_api.org_roles.id;
 
 
 --
@@ -930,39 +872,10 @@ ALTER TABLE ONLY opensociocracy_api.org ALTER COLUMN account_id SET DEFAULT next
 
 
 --
--- Name: org_group id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.org_group ALTER COLUMN id SET DEFAULT nextval('opensociocracy_api.account_circle_id_seq'::regclass);
-
-
---
--- Name: org_group_member id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.org_group_member ALTER COLUMN id SET DEFAULT nextval('opensociocracy_api.org_circle_member_id_seq'::regclass);
-
-
---
--- Name: org_roles id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.org_roles ALTER COLUMN id SET DEFAULT nextval('opensociocracy_api.org_roles_id_seq'::regclass);
-
-
---
 -- Name: response id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
 --
 
 ALTER TABLE ONLY opensociocracy_api.response ALTER COLUMN id SET DEFAULT nextval('opensociocracy_api.response_id_seq'::regclass);
-
-
---
--- Name: org_group account_circle_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.org_group
-    ADD CONSTRAINT account_circle_pkey PRIMARY KEY (id);
 
 
 --
@@ -1030,11 +943,11 @@ ALTER TABLE ONLY opensociocracy_api.reaction
 
 
 --
--- Name: org_group_member org_group_member_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: org_member org_member_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_group_member
-    ADD CONSTRAINT org_group_member_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY opensociocracy_api.org_member
+    ADD CONSTRAINT org_member_pkey PRIMARY KEY (org_id, member_id);
 
 
 --
@@ -1043,14 +956,6 @@ ALTER TABLE ONLY opensociocracy_api.org_group_member
 
 ALTER TABLE ONLY opensociocracy_api.org
     ADD CONSTRAINT org_pkey PRIMARY KEY (id);
-
-
---
--- Name: org_roles org_roles_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.org_roles
-    ADD CONSTRAINT org_roles_pkey PRIMARY KEY (id);
 
 
 --
@@ -1107,46 +1012,6 @@ ALTER TABLE ONLY opensociocracy_api.member
 
 ALTER TABLE ONLY opensociocracy_api.nugget
     ADD CONSTRAINT uq_nugget_uid UNIQUE (uid);
-
-
---
--- Name: org_group uq_org_circle_org_name; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.org_group
-    ADD CONSTRAINT uq_org_circle_org_name UNIQUE (org_id, name);
-
-
---
--- Name: org_group uq_org_circle_uid; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.org_group
-    ADD CONSTRAINT uq_org_circle_uid UNIQUE (uid);
-
-
---
--- Name: org_group_member uq_org_group_member_group_member_email; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.org_group_member
-    ADD CONSTRAINT uq_org_group_member_group_member_email UNIQUE (member_email, org_group_id);
-
-
---
--- Name: org_group_member uq_org_group_member_uid; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.org_group_member
-    ADD CONSTRAINT uq_org_group_member_uid UNIQUE (uid);
-
-
---
--- Name: org_roles uq_org_role_uid; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.org_roles
-    ADD CONSTRAINT uq_org_role_uid UNIQUE (uid);
 
 
 --
@@ -1238,27 +1103,19 @@ ALTER TABLE ONLY opensociocracy_api.org
 
 
 --
--- Name: org_group fk_org_circle_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: org_member fk_org_member_member_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_group
-    ADD CONSTRAINT fk_org_circle_org_id FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id) NOT VALID;
-
-
---
--- Name: org_group_member fk_org_group_member_org_group_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.org_group_member
-    ADD CONSTRAINT fk_org_group_member_org_group_id FOREIGN KEY (org_group_id) REFERENCES opensociocracy_api.org_group(id) NOT VALID;
+ALTER TABLE ONLY opensociocracy_api.org_member
+    ADD CONSTRAINT fk_org_member_member_id FOREIGN KEY (member_id) REFERENCES opensociocracy_api.member(id);
 
 
 --
--- Name: org_roles fk_org_group_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: org_member fk_org_member_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.org_roles
-    ADD CONSTRAINT fk_org_group_org_id FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id) NOT VALID;
+ALTER TABLE ONLY opensociocracy_api.org_member
+    ADD CONSTRAINT fk_org_member_org_id FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id);
 
 
 --
@@ -1329,20 +1186,6 @@ GRANT USAGE ON SCHEMA opensociocracy_api TO opensociocracy_supertokens;
 --
 
 GRANT ALL ON TABLE opensociocracy_api.account TO opensociocracy_supertokens;
-
-
---
--- Name: TABLE org_group; Type: ACL; Schema: opensociocracy_api; Owner: -
---
-
-GRANT ALL ON TABLE opensociocracy_api.org_group TO opensociocracy_supertokens;
-
-
---
--- Name: SEQUENCE account_circle_id_seq; Type: ACL; Schema: opensociocracy_api; Owner: -
---
-
-GRANT ALL ON SEQUENCE opensociocracy_api.account_circle_id_seq TO opensociocracy_supertokens;
 
 
 --
@@ -1441,20 +1284,6 @@ GRANT ALL ON TABLE opensociocracy_api.org TO opensociocracy_supertokens;
 --
 
 GRANT ALL ON SEQUENCE opensociocracy_api.org_account_id_seq TO opensociocracy_supertokens;
-
-
---
--- Name: TABLE org_group_member; Type: ACL; Schema: opensociocracy_api; Owner: -
---
-
-GRANT ALL ON TABLE opensociocracy_api.org_group_member TO opensociocracy_supertokens;
-
-
---
--- Name: SEQUENCE org_circle_member_id_seq; Type: ACL; Schema: opensociocracy_api; Owner: -
---
-
-GRANT ALL ON SEQUENCE opensociocracy_api.org_circle_member_id_seq TO opensociocracy_supertokens;
 
 
 --

@@ -22,7 +22,7 @@ const LogbookService = (postgres) => {
     }
   };
 
-  const createLogbook = async (logbookData, memberUid) => {
+  const createLogbook = async (memberUid, logbookData) => {
     const client = await postgres.connect();
 
     let query;
@@ -53,7 +53,7 @@ const LogbookService = (postgres) => {
     }
   };
 
-  const createLogbookEntry = async (logbookEntryData, memberUid) => {
+  const createLogbookEntry = async (memberUid, logbookUid, logbookEntryData) => {
     const client = await postgres.connect();
 
     let query;
@@ -63,7 +63,10 @@ const LogbookService = (postgres) => {
         FROM create_logbook_entry(
           $1, $2, $3, $4
       )`;
-    values = [memberUid, logbookEntryData.logbookUid, logbookEntryData.nuggetUid, logbookEntryData.note];
+
+    const nuggetUid = logbookEntryData.nuggetUid ? logbookEntryData.nuggetUid : null;
+    const note = logbookEntryData.note ? logbookEntryData.note : null;
+    values = [memberUid, logbookUid, nuggetUid, note];
 
     try {
       const result = await client.query(query, values);

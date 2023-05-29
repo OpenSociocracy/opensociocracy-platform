@@ -34,7 +34,7 @@ const OrgService = (postgres) => {
           $1, $2, $3, $4
       )`;
 
-    values = [orgData.name, orgData.note, memberUid, orgData.accountUid];
+    values = [memberUid, orgData.accountUid, orgData.name, orgData.note];
 
     try {
       const result = await client.query(query, values);
