@@ -2,20 +2,58 @@ import fastifyPlugin from "fastify-plugin";
 import { verifySession } from "supertokens-node/recipe/session/framework/fastify/index.js";
 
 async function logbookEntryRoutes(server, options) {
+
   server.get(
-    "/logbooks/:logbookUid/entries",
+    "/logbooks/:logbookUid/nuggets/:nuggetUid",
     {
       preHandler: verifySession(),
       schema: {
-        description: "Get entries for a logbook",
+        description: "Get a logbook nugget",
         tags: ["logbooks"],
-        summary: "Get a logbook's entries.",
+        summary: "Get a given nugget related to a logbook",
         response: {
           200: {
             description: "Success Response",
             type: "object",
             properties: {
-              logbookEntries: { type: "array" },
+              nugget: { 
+                type: "object",
+                properties: {
+                    nuggetUid: {
+                        type: "string"
+                    },
+                    createdAt: {
+                        type: "string"
+                    },
+                    updatedAt: {
+                        type: "string"
+                    },
+                    pubAt: {
+                        type: "string"
+                    },
+                    unPubAt: {
+                        type: "string"
+                    },
+                    publicTitle: {
+                        type: "string"
+                    },
+                    internalName: {
+                        type: "string"
+                    },
+                    blocks: {
+                        type: "array"
+                    },
+                    nuggetType: {
+                        type: "string"
+                    },
+                    orgUid: {
+                        type: "string"
+                    },
+                    accountUid: {
+                        type: "string"
+                    },
+                }
+              },
             },
           },
         },
@@ -26,15 +64,16 @@ async function logbookEntryRoutes(server, options) {
 
       const logbookUid = req.params.logbookUid;
 
-      const result = await server.logbookService.getLogbookEntries(memberUid, logbookUid);
+      const nuggetUid = req.params.nuggetUid;
 
-      console.log('ROUTER RESULT', result)
+      const result = await server.nuggetService.getLogbookNugget(memberUid, logbookUid, nuggetUid);
+      console.log('ROUTER ', result)
 
       return result;
     }
   );
-  server.post(
-    "/logbooks/:logbookUid/entries",
+  server.put(
+    "/logbooks/:logbookUid/nuggets",
     {
       preHandler: verifySession(),
       schema: {

@@ -194,6 +194,113 @@ $$;
 
 
 --
+-- Name: create_logbook_entry_nugget(uuid, uuid, timestamp with time zone, timestamp with time zone, character varying, character varying, jsonb, opensociocracy_api.nugget_types, text); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.create_logbook_entry_nugget(member_uid_in uuid, logbook_uid_in uuid, pub_at_in timestamp with time zone, un_pub_at_in timestamp with time zone, public_title_in character varying, internal_name_in character varying, blocks_in jsonb, nugget_type_in opensociocracy_api.nugget_types, note_in text) RETURNS TABLE("nuggetId" bigint, "nuggetUid" uuid, "logbookEntryId" bigint, "logbookEntryUid" uuid, "createdAt" timestamp without time zone)
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE new_nugget_id BIGINT;
+DECLARE new_nugget_uid uuid;
+DECLARE new_logbook_entry_id BIGINT;
+DECLARE new_logbook_entry_uid uuid;
+DECLARE new_logbook_entry_created_at timestamp without time zone;
+DECLARE valid_org_id bigint;
+DECLARE valid_account_id bigint;
+DECLARE valid_logbook_id bigint;
+
+BEGIN
+	-- Get account and org id, ensuring they are connected to the member
+	SELECT account_id, org_id, logbook_id FROM valid_logbook_account_org(member_uid_in, logbook_uid_in) INTO valid_account_id, valid_org_id, valid_logbook_id;
+    
+	-- Create the nugget
+	INSERT INTO opensociocracy_api.nugget(
+		pub_at, 
+		  un_pub_at, 
+		  public_title, 
+		  internal_name, 
+		  blocks,
+		  nugget_type, 
+		  org_id, 
+		  account_id)
+		 VALUES(
+			 pub_at_in, 
+			 un_pub_at_in, 
+			 public_title_in, 
+			 internal_name_in, 
+			 blocks_in,
+			 nugget_type_in, 
+			 valid_org_id,
+			 valid_account_id
+			)
+		-- Store nugget creation results
+		RETURNING opensociocracy_api.nugget.id, opensociocracy_api.nugget.uid, opensociocracy_api.nugget.created_at 
+		INTO new_nugget_id, new_nugget_uid;
+	
+	-- Create a new logbook entry, referencing the nugget
+	INSERT INTO opensociocracy_api.logbook_entry(logbook_id, nugget_id, note)
+		 VALUES(
+			valid_logbook_id,
+		    new_nugget_id,
+		     note_in)
+		 RETURNING opensociocracy_api.logbook_entry.id, opensociocracy_api.logbook_entry.uid, opensociocracy_api.logbook_entry.created_at INTO new_logbook_entry_id, new_logbook_entry_uid, new_logbook_entry_created_at;
+
+	-- Return ID and UID of nugget and logbookRecord
+	RETURN QUERY SELECT new_nugget_id, new_nugget_uid, new_logbook_entry_id, new_logbook_entry_uid, new_logbook_entry_created_at;
+	
+	
+END; 
+$$;
+
+
+--
+-- Name: create_logbook_nugget(uuid, uuid, timestamp with time zone, timestamp with time zone, character varying, character varying, jsonb, opensociocracy_api.nugget_types); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.create_logbook_nugget(member_uid_in uuid, logbook_uid_in uuid, pub_at_in timestamp with time zone, un_pub_at_in timestamp with time zone, public_title_in character varying, internal_name_in character varying, blocks_in jsonb, nugget_type_in opensociocracy_api.nugget_types) RETURNS TABLE(id bigint, uid uuid, "createdAt" timestamp without time zone)
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE new_record_id BIGINT;
+DECLARE new_record_uid uuid;
+DECLARE new_record_created_at timestamp without time zone;
+DECLARE valid_org_id bigint;
+DECLARE valid_account_id bigint;
+
+BEGIN
+
+	SELECT account_id, org_id FROM valid_logbook_account_org(member_uid_in, logbook_uid_in) INTO valid_account_id, valid_org_id;
+    
+	INSERT INTO opensociocracy_api.nugget(pub_at, 
+										  un_pub_at, 
+										  public_title, 
+										  internal_name, 
+										  blocks,
+										  nugget_type, 
+										  org_id, 
+										  account_id)
+		 VALUES(
+			 pub_at_in, 
+			  un_pub_at_in, 
+			  public_title_in, 
+			  internal_name_in, 
+			  blocks_in,
+			  nugget_type_in, 
+			 valid_org_id,
+			 valid_account_id
+			)
+		 RETURNING opensociocracy_api.nugget.id, opensociocracy_api.nugget.uid, opensociocracy_api.nugget.created_at INTO new_record_id, new_record_uid, new_record_created_at;
+		
+	 
+	RETURN QUERY SELECT new_record_id, new_record_uid, new_record_created_at;
+	
+	
+END; 
+$$;
+
+
+--
 -- Name: create_member_nugget(character varying, character varying, character varying, uuid, jsonb); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -345,6 +452,43 @@ $$;
 
 
 --
+-- Name: get_logbook_nugget(uuid, uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_logbook_nugget(member_uid_in uuid, logbook_uid_in uuid, nugget_uid_in uuid) RETURNS TABLE("nuggetUid" uuid, "createdAt" timestamp without time zone, "updatedAt" timestamp without time zone, "pubAt" timestamp with time zone, "unPubAt" timestamp with time zone, "publicTitle" character varying, "internalName" character varying, blocks jsonb, "nuggetType" opensociocracy_api.nugget_types, "orgUid" uuid, "accountUid" uuid)
+    LANGUAGE plpgsql ROWS 1
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT 
+				  n.uid, 
+				  n.created_at, 
+				  n.updated_at,
+				  n.pub_at, 
+				  n.un_pub_at,
+				  n.public_title,
+				  n.internal_name,
+				  n.blocks,
+				  n.nugget_type,
+				  o.uid AS org_uid,
+				  a.uid AS account_uid
+	FROM nugget n 
+	INNER JOIN org o ON o.id = n.org_id
+	INNER JOIN account a ON a.id = n.account_id
+	INNER JOIN account_member am ON am.account_id = a.id
+	INNER JOIN member m ON m.id = am.member_id
+    INNER JOIN logbook_entry le ON le.nugget_id = n.id
+	INNER JOIN logbook l ON l.id = le.logbook_id
+	WHERE n.uid = nugget_uid_in
+	AND m.uid = member_uid_in
+ 	AND l.uid = logbook_uid_in );
+
+	
+END; 
+$$;
+
+
+--
 -- Name: get_member_account(uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -486,6 +630,29 @@ BEGIN
 		 
 		 RETURN NEW;
 END;
+$$;
+
+
+--
+-- Name: valid_logbook_account_org(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.valid_logbook_account_org(member_uid_in uuid, logbook_uid_in uuid) RETURNS TABLE(account_id bigint, org_id bigint, logbook_id bigint)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT a.id AS account_id, o.id AS org_id, l.id AS logbook_id
+		FROM opensociocracy_api.account a
+		INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+		INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	    INNER JOIN opensociocracy_api.org o ON o.account_id = a.id
+	    INNER JOIN opensociocracy_api.org_member om ON om.org_id = o.id AND om.member_id = m.id
+	    INNER JOIN opensociocracy_api.logbook l ON l.org_id = o.id
+		WHERE m.uid =  member_uid_in
+		AND l.uid = logbook_uid_in
+		AND (om.role = ANY('{"owner","leader"}') OR  'owner' = ANY(am.roles)));	
+END; 
 $$;
 
 
@@ -658,13 +825,14 @@ CREATE TABLE opensociocracy_api.nugget (
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp without time zone,
-    pub_at timestamp without time zone,
-    un_pub_at timestamp without time zone,
+    pub_at timestamp with time zone,
+    un_pub_at timestamp with time zone,
     public_title character varying(150),
     internal_name character varying(75),
     blocks jsonb DEFAULT '{}'::jsonb,
     nugget_type opensociocracy_api.nugget_types DEFAULT 'json'::opensociocracy_api.nugget_types NOT NULL,
-    org_id bigint NOT NULL
+    org_id bigint,
+    account_id bigint NOT NULL
 );
 
 
