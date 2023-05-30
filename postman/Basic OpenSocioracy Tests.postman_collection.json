@@ -992,11 +992,13 @@
 											"var jsonData = pm.response.json();",
 											"",
 											"pm.test(\"Has proper fields\", function () {",
-											"  ",
 											"    pm.expect(jsonData.logbookEntryUid).to.exist;",
 											"    pm.expect(jsonData.createdAt).to.exist;",
 											"    pm.expect(jsonData.nuggetUid).to.exist;",
-											"});"
+											"});",
+											"",
+											"pm.environment.set(\"newNuggetUid\", jsonData.nuggetUid);",
+											"pm.environment.set(\"newLogbookEntryUid\", jsonData.logbookEntryUid);"
 										],
 										"type": "text/javascript"
 									}
@@ -1058,6 +1060,22 @@
 											"pm.test(\"HTTP Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
 											"});",
+											"",
+											"pm.test(\"Data has the correct shape\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.nuggetUid).to.exist;",
+											"     pm.expect(jsonData.createdAt).to.exist;",
+											"      pm.expect(jsonData.updatedAt).to.exist;",
+											"       pm.expect(jsonData.pubAt).to.exist;",
+											"        pm.expect(jsonData.unPubAt).to.exist;",
+											"         pm.expect(jsonData.publicTitle).to.exist;",
+											"          pm.expect(jsonData.internalName).to.exist;",
+											"           pm.expect(jsonData.blocks).to.exist;",
+											"            pm.expect(jsonData.nuggetType).to.exist;",
+											"             pm.expect(jsonData.orgUid).to.exist;",
+											"             // pm.expect(jsonData.accountUid).to.exist;",
+											"",
+											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -1088,15 +1106,15 @@
 									}
 								],
 								"url": {
-									"raw": "{{apiUri}}/logbooks/{{logbookUid}}/entries/{{nuggetUid}}",
+									"raw": "{{apiUri}}/logbooks/{{logbookUid}}/nuggets/{{newNuggetUid}}",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
 										"logbooks",
 										"{{logbookUid}}",
-										"entries",
-										"{{nuggetUid}}"
+										"nuggets",
+										"{{newNuggetUid}}"
 									]
 								}
 							},

@@ -452,6 +452,43 @@ $$;
 
 
 --
+-- Name: get_logbook_nugget(uuid, uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_logbook_nugget(member_uid_in uuid, logbook_uid_in uuid, nugget_uid_in uuid) RETURNS TABLE("nuggetUid" uuid, "createdAt" timestamp without time zone, "updatedAt" timestamp without time zone, "pubAt" timestamp with time zone, "unPubAt" timestamp with time zone, "publicTitle" character varying, "internalName" character varying, blocks jsonb, "nuggetType" opensociocracy_api.nugget_types, "orgUid" uuid, "accountUid" uuid)
+    LANGUAGE plpgsql ROWS 1
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT 
+				  n.uid, 
+				  n.created_at, 
+				  n.updated_at,
+				  n.pub_at, 
+				  n.un_pub_at,
+				  n.public_title,
+				  n.internal_name,
+				  n.blocks,
+				  n.nugget_type,
+				  o.uid AS org_uid,
+				  a.uid AS account_uid
+	FROM nugget n 
+	INNER JOIN org o ON o.id = n.org_id
+	INNER JOIN account a ON a.id = n.account_id
+	INNER JOIN account_member am ON am.account_id = a.id
+	INNER JOIN member m ON m.id = am.member_id
+    INNER JOIN logbook_entry le ON le.nugget_id = n.id
+	INNER JOIN logbook l ON l.id = le.logbook_id
+	WHERE n.uid = nugget_uid_in
+	AND m.uid = member_uid_in
+ 	AND l.uid = logbook_uid_in );
+
+	
+END; 
+$$;
+
+
+--
 -- Name: get_member_account(uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -788,8 +825,8 @@ CREATE TABLE opensociocracy_api.nugget (
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp without time zone,
-    pub_at timestamp without time zone,
-    un_pub_at timestamp without time zone,
+    pub_at timestamp with time zone,
+    un_pub_at timestamp with time zone,
     public_title character varying(150),
     internal_name character varying(75),
     blocks jsonb DEFAULT '{}'::jsonb,

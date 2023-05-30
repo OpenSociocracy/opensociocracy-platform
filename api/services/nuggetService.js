@@ -48,8 +48,6 @@ const NuggetService = (postgres) => {
 
       const newData = result.rows[0];
 
-      console.log('NEW DATA', newData);
-
       // Note: avoid doing expensive computation here, this will block releasing the client
       return {
         nuggetId: newData.id,
@@ -89,8 +87,6 @@ const NuggetService = (postgres) => {
 
       const newData = result.rows[0];
 
-      console.log('NEW DATA', newData);
-
       // Note: avoid doing expensive computation here, this will block releasing the client
       return {
         nuggetId: newData.nuggetId,
@@ -117,8 +113,6 @@ const NuggetService = (postgres) => {
         [memberUid, nuggetUid]
       );
 
-      console.log('SERVICE RESULT', rows)
-
       // Note: avoid doing expensive computation here, this will block releasing the client
       return { nuggetEntries: rows };
     } finally {
@@ -127,7 +121,29 @@ const NuggetService = (postgres) => {
     }
   }
 
-  return { createNuggetForLogbook, createNuggetWithLogbookEntry };
+  const getLogbookNugget = async (memberUid, logbookUid, nuggetUid) => {
+    const client = await postgres.connect();
+
+    try {
+      const {
+        rows,
+      } = await client.query(
+        ` SELECT *
+        FROM get_logbook_nugget($1, $2, $3)`,
+        [memberUid, logbookUid, nuggetUid]
+      );
+
+      console.log('SERVICE RESULT', rows)
+
+      // Note: avoid doing expensive computation here, this will block releasing the client
+      return { nugget: rows[0] };
+    } finally {
+      // Release the client immediately after query resolves, or upon error
+      client.release();
+    }
+  }
+
+  return { createNuggetForLogbook, createNuggetWithLogbookEntry, getLogbookNugget };
 };
 
 export default fp((server, options, next) => {
