@@ -74,7 +74,7 @@ const NuggetService = (postgres) => {
 	const internalName = nuggetData.internalName ? nuggetData.internalName : null;
 	const blocks = nuggetData.blocks ? JSON.stringify(nuggetData.blocks) : null;
 	const nuggetType = nuggetData.nuggetType ? nuggetData.nuggetType : null;
-  const note = metaData.note ? metaData : null;
+  const note = metaData.note ? metaData.note : null;
 
     query = `SELECT * 
         FROM create_logbook_entry_nugget(

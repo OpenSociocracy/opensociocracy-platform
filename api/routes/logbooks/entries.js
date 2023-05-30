@@ -71,7 +71,7 @@ async function logbookEntryRoutes(server, options) {
       let result;
 
       let metaData = {};
-      metaData.note ? req.body.note : null;
+      metaData.note = req.body.note ? req.body.note : null;
 
       // If there is nugget data, we need to create the nugget first.
       if(req.body.nugget)  {

@@ -179,6 +179,78 @@
 					"response": []
 				},
 				{
+					"name": "API Auth - Renew Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Returned status is OK\", function () {",
+									"    jsonData.status == \"OK\"",
+									"});",
+									"",
+									"// Set variables for deviceId and preAuthSessionId so we can use them when submitting the code",
+									"",
+									"pm.environment.set(\"deviceId_1\", jsonData.deviceId);",
+									"pm.environment.set(\"preAuthSessionId_1\", jsonData.preAuthSessionId);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{randoEmail}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/auth/signinup/code",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"auth",
+								"signinup",
+								"code"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "API Auth - Submit OTP",
 					"event": [
 						{
@@ -225,7 +297,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"deviceId\": \"{{deviceId_1}}\",\n    \"preAuthSessionId\": \"{{preAuthSessionId_1}}\",\n    \"userInputCode\": \"903318\"\n}",
+							"raw": "{\n    \"deviceId\": \"{{deviceId_1}}\",\n    \"preAuthSessionId\": \"{{preAuthSessionId_1}}\",\n    \"userInputCode\": \"466759\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -347,6 +419,7 @@
 											"});",
 											"",
 											"var jsonData = pm.response.json();",
+											"pm.environment.set(\"currentAccount\", jsonData.uid);",
 											"",
 											"pm.test(\"UUID found\", function () {",
 											"    pm.expect(jsonData.uid).to.exist;",
@@ -424,6 +497,11 @@
 										"exec": [
 											"const jsonData = pm.response.json();",
 											"",
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
 											"const accounts = jsonData.accounts;",
 											"",
 											"pm.test(\"More than one account found\", function () {",
@@ -491,6 +569,11 @@
 										"exec": [
 											"const jsonData = pm.response.json();",
 											"",
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
 											"const orgs = jsonData.orgs;",
 											"",
 											"_.forEach(orgs, function(org) {",
@@ -553,6 +636,11 @@
 											"const jsonData = pm.response.json();",
 											"pm.environment.set(\"orgUid\", jsonData.orgUid);",
 											"pm.environment.set(\"logbookUid\", jsonData.logbookUid);",
+											"",
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
 											"",
 											"pm.test(\"Response is valid shape\", function () {",
 											"    pm.expect(jsonData.orgUid).to.exist;",
@@ -627,6 +715,11 @@
 											"    pm.environment.set(\"orgUid\", org.orgUid);",
 											"});",
 											"",
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
 											"",
 											"pm.test(\"No orgs found yet, as expected\", function () {",
 											"    pm.expect(orgs.length).to.be.gt(0);",
@@ -687,6 +780,10 @@
 									"script": {
 										"exec": [
 											"const jsonData = pm.response.json();",
+											"",
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											"",
 											"const logbooks = jsonData.logbooks;",
 											"",
@@ -751,6 +848,10 @@
 											"const jsonData = pm.response.json();",
 											"",
 											"const logbookEntries = jsonData.logbookEntries;",
+											"",
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											"",
 											"pm.test(\"One or more logbook entry found\", function () {",
 											"    pm.expect(logbookEntries.length).to.be.greaterThan(0);",
@@ -817,6 +918,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -881,7 +985,18 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											""
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"var jsonData = pm.response.json();",
+											"",
+											"pm.test(\"Has proper fields\", function () {",
+											"  ",
+											"    pm.expect(jsonData.logbookEntryUid).to.exist;",
+											"    pm.expect(jsonData.createdAt).to.exist;",
+											"    pm.expect(jsonData.nuggetUid).to.exist;",
+											"});"
 										],
 										"type": "text/javascript"
 									}
@@ -912,7 +1027,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"note\": \"This org event happened, and I have a nugget of info\",\n    \"nugget\": {\n        \"nuggetType\": \"proposal\",\n        \"pubAt\": \"2023-05-25\",\n        \"internalName\": \"Proposal to recover the parking lot.\",\n        \"publicTitle\": \"Prettier Parking\",\n        \"blocks\": [\n            {\n                \"blockType\": \"standardProposal\",\n                \"data\": {\n\n                }\n            },\n            {\n                \"blockType\": \"slideDeck\",\n                \"data\": {\n                    \n                }\n            },\n            {\n                \"blockType\": \"spreadsheet\",\n                \"data\": {\n                    \n                }\n            }\n        ]\n}",
+									"raw": "{\n    \"note\": \"This org event happened, and I have a nugget of info\",\n    \"nugget\": {\n        \"nuggetType\": \"proposal\",\n        \"pubAt\": \"2023-05-25\",\n        \"internalName\": \"Proposal to recover the parking lot with a lot.\",\n        \"publicTitle\": \"Prettier Parking Lot\",\n        \"blocks\": [\n            {\n                \"blockType\": \"standardProposal\",\n                \"data\": {\n\n                }\n            },\n            {\n                \"blockType\": \"slideDeck\",\n                \"data\": {\n                    \n                }\n            },\n            {\n                \"blockType\": \"spreadsheet\",\n                \"data\": {\n                    \n                }\n            }\n        ]\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -920,13 +1035,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{apiUri}}/logbook/{{logbookUid}}",
+									"raw": "{{apiUri}}/logbooks/{{logbookUid}}/entries",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"logbook",
-										"{{logbookUid}}"
+										"logbooks",
+										"{{logbookUid}}",
+										"entries"
 									]
 								}
 							},
@@ -939,6 +1055,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -969,12 +1088,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{apiUri}}/nugget/{{nuggetUid}}",
+									"raw": "{{apiUri}}/logbooks/{{logbookUid}}/entries/{{nuggetUid}}",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"nugget",
+										"logbooks",
+										"{{logbookUid}}",
+										"entries",
 										"{{nuggetUid}}"
 									]
 								}
@@ -988,6 +1109,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -1051,6 +1175,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -1101,6 +1228,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -1160,6 +1290,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -1223,6 +1356,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -1273,6 +1409,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -1337,6 +1476,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -1387,6 +1529,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -1446,6 +1591,9 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"HTTP Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
 											""
 										],
 										"type": "text/javascript"
