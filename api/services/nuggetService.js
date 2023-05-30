@@ -28,14 +28,20 @@ const NuggetService = (postgres) => {
     let query;
     let values;
 
-    // @TODO Validate nuggets by type before hitting database.
+	const pubAt = nuggetData.pubAt ? nuggetData.pubAt : null;
+	const unPubAt = nuggetData.unPubAt ? nuggetData.unPubAt : null;  
+	const publicTitle = nuggetData.publicTitle ? nuggetData.publicTitle : null;
+	const internalName = nuggetData.internalName ? nuggetData.internalName : null;
+	const blocks = nuggetData.blocks ? JSON.stringify(nuggetData.blocks) : null;
+	const nuggetType = nuggetData.nuggetType ? nuggetData.nuggetType : null;
 
-    query = `SELECT "nuggetId", "nuggetUid" , "createdAt" 
+    query = `SELECT * 
         FROM create_logbook_nugget(
-          $1, $2, $3
+          $1, $2, $3, $4, $5, $6, $7, $8
       )`;
 
-    values = [memberUid, logbookUid, nuggetData];
+    values = [memberUid, logbookUid, pubAt, unPubAt, publicTitle, internalName, blocks, nuggetType];
+    
 
     try {
       const result = await client.query(query, values);
