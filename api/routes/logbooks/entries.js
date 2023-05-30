@@ -70,6 +70,8 @@ async function logbookEntryRoutes(server, options) {
 
       let data = req.body.note ;
 
+      let result;
+
       // If there is nugget data, we need to create the nugget first.
       if(req.body.nugget)  {
 

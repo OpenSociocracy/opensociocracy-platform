@@ -44,41 +44,9 @@ const NuggetService = (postgres) => {
 
       // Note: avoid doing expensive computation here, this will block releasing the client
       return {
+        logbookEntryUid: newData.logbookEntryUid,
         nuggetUid: newData.nuggetUid,
         createdAt: newData.createdAt
-      };
-    } finally {
-      // Release the client immediately after query resolves, or upon error
-      client.release();
-    }
-  };
-
-  const createNuggetEntry = async (memberUid, nuggetUid, nuggetEntryData) => {
-    const client = await postgres.connect();
-
-    let query;
-    let values;
-
-    query = `SELECT "nuggetEntryId", "nuggetEntryUid" , "createdAt"
-        FROM create_nugget_entry(
-          $1, $2, $3, $4
-      )`;
-
-    const nuggetUid = nuggetEntryData.nuggetUid ? nuggetEntryData.nuggetUid : null;
-    const note = nuggetEntryData.note ? nuggetEntryData.note : null;
-    values = [memberUid, nuggetUid, nuggetUid, note];
-
-    try {
-      const result = await client.query(query, values);
-
-      const newData = result.rows[0];
-
-      // Note: avoid doing expensive computation here, this will block releasing the client
-      return {
-        nuggetUid: newData.nuggetUid,
-        createdAt: newData.createdAt,
-        name: nuggetEntryData.name,
-        nuggetUid: newData.nuggetUid
       };
     } finally {
       // Release the client immediately after query resolves, or upon error
@@ -108,7 +76,7 @@ const NuggetService = (postgres) => {
     }
   }
 
-  return { getOrgNuggets, createNugget, createNuggetEntry, getNuggetEntries };
+  return { createNuggetForLogbook };
 };
 
 export default fp((server, options, next) => {
