@@ -165,6 +165,35 @@ $_$;
 
 
 --
+-- Name: create_logbook_entry(uuid, uuid, uuid, text); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.create_logbook_entry(member_uid_in uuid, logbook_uid_in uuid, nugget_uid_in uuid, note_in text) RETURNS TABLE("logbookEntryId" bigint, "logbookEntryUid" uuid, "createdAt" timestamp without time zone)
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE new_record_id BIGINT;
+DECLARE new_record_uid uuid;
+DECLARE new_record_created_at timestamp without time zone;
+
+BEGIN
+    
+	INSERT INTO opensociocracy_api.logbook_entry(logbook_id, nugget_id, note)
+		 VALUES(
+			(SELECT id FROM logbook_by_member(member_uid_in, logbook_uid_in)),
+		    (SELECT id FROM nugget WHERE uid = nugget_uid_in),
+		     note_in)
+		 RETURNING opensociocracy_api.logbook_entry.id, opensociocracy_api.logbook_entry.uid, opensociocracy_api.logbook_entry.created_at INTO new_record_id, new_record_uid, new_record_created_at;
+		
+	 
+	RETURN QUERY SELECT new_record_id, new_record_uid, new_record_created_at;
+	
+	
+END; 
+$$;
+
+
+--
 -- Name: create_logbook_nugget(uuid, uuid, timestamp with time zone, timestamp with time zone, character varying, character varying, jsonb, opensociocracy_api.nugget_types); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
