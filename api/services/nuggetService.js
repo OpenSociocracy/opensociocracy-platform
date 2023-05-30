@@ -48,10 +48,12 @@ const NuggetService = (postgres) => {
 
       const newData = result.rows[0];
 
+      console.log('NEW DATA', newData);
+
       // Note: avoid doing expensive computation here, this will block releasing the client
       return {
-        logbookEntryUid: newData.logbookEntryUid,
-        nuggetUid: newData.nuggetUid,
+        nuggetId: newData.id,
+        nuggetUid: newData.uid,
         createdAt: newData.createdAt
       };
     } finally {
