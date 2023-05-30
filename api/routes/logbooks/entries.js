@@ -68,28 +68,20 @@ async function logbookEntryRoutes(server, options) {
 
       const logbookUid = req.params.logbookUid;
 
-      let data = {};
-      data.note = req.body.note ;
-
       let result;
+
+      let metaData = {};
+      metaData.note ? req.body.note : null;
 
       // If there is nugget data, we need to create the nugget first.
       if(req.body.nugget)  {
 
         // Use the logbookUid to get the proper org_id
-        const result = await server.nuggetService.createNuggetForLogbook(memberUid, logbookUid, req.body.nugget);
+        result = await server.nuggetService.createNuggetWithLogbookEntry(memberUid, logbookUid, metaData, req.body.nugget);
 
-        console.log('RESULT ', result)
-
-        data = {...data, nuggetUid: result.nuggetUid }
-
+      } else {
+        result = await server.logbookService.createLogbookEntry(memberUid, logbookUid, metaData);
       }
-
-      console.log('DATA ', data)
-      
-      
-      result = await server.logbookService.createLogbookEntry(memberUid, logbookUid, data);
- 
 
       return result;
     }
