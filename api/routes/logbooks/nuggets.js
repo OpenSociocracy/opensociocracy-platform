@@ -73,13 +73,13 @@ async function logbookEntryRoutes(server, options) {
     }
   );
   server.put(
-    "/logbooks/:logbookUid/nuggets",
+    "/logbooks/:logbookUid/nuggets/:nuggetUid",
     {
       preHandler: verifySession(),
       schema: {
-        description: "Create a new logbook entry",
+        description: "Replace nugget data",
         tags: ["logbooks"],
-        summary: "Add a new entry to the logbook",
+        summary: "Replace nugget data",
         body: {
           type: "object",
           properties: {
@@ -94,8 +94,7 @@ async function logbookEntryRoutes(server, options) {
             description: "Success Response",
             type: "object",
             properties: {
-              logbookEntryUid: { type: "string" },
-              createdAt: { type: "string" },
+              updatedAt: { type: "string" },
               nuggetUid: { type: "string" }
             },
           },
@@ -121,6 +120,46 @@ async function logbookEntryRoutes(server, options) {
       } else {
         result = await server.logbookService.createLogbookEntry(memberUid, logbookUid, metaData);
       }
+
+      return result;
+    }
+  );
+
+  server.patch(
+    "/logbooks/:logbookUid/nuggets/:nuggetUid",
+    {
+      preHandler: verifySession(),
+      schema: {
+        description: "Patch nugget data",
+        tags: ["logbooks"],
+        summary: "Update provided fields of the nugget",
+        body: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+              description: "The name for the logbook",
+              },
+          },
+        },
+        response: {
+          200: {
+            description: "Success Response",
+            type: "object",
+            properties: {
+              updatedAt: { type: "string" },
+              nuggetUid: { type: "string" }
+            },
+          },
+        },
+      },
+    },
+    async (req, reply) => {
+      const memberUid = req.session.getUserId();
+
+      const nuggetUid = req.params.nuggetUid;
+
+      let result = await server.nuggetService.patchNugget(memberUid, nuggetUid, req.body.nugget);
 
       return result;
     }
