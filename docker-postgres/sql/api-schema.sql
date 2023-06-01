@@ -634,6 +634,42 @@ $$;
 
 
 --
+-- Name: patch_nugget(uuid, uuid, character varying, character varying); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.patch_nugget(member_uid_in uuid, nugget_uid_in uuid, public_title_in character varying, internal_name_in character varying) RETURNS TABLE(uid uuid, "updatedAt" timestamp without time zone)
+    LANGUAGE plpgsql ROWS 1
+    AS $$
+
+BEGIN
+
+	UPDATE nugget SET
+	  public_title = COALESCE(NULLIF(public_title_in, ''), public_title),
+	  internal_name = COALESCE(NULLIF(internal_name_in, ''), internal_name)
+	WHERE nugget.uid = nugget_uid_in;
+	 
+	RETURN QUERY SELECT nugget_uid_in, LOCALTIMESTAMP;
+	
+	
+END; 
+$$;
+
+
+--
+-- Name: set_nugget_updated_at(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.set_nugget_updated_at() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: valid_logbook_account_org(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -1196,6 +1232,13 @@ ALTER TABLE ONLY opensociocracy_api.org
 
 ALTER TABLE ONLY opensociocracy_api.response
     ADD CONSTRAINT uq_response_uid UNIQUE (uid);
+
+
+--
+-- Name: nugget set_nugget_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TRIGGER set_nugget_updated_at BEFORE UPDATE ON opensociocracy_api.nugget FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_nugget_updated_at();
 
 
 --
