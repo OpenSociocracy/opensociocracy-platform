@@ -8,6 +8,14 @@ const routes = [
     ]
   },
 
+  {
+    path: '/forms/:formName',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/FormWrapperPage.vue') }
+    ]
+  },
+
   // Always leave this as last one,
   // but you can also remove it
   {
