@@ -50,7 +50,7 @@
       <q-list>
         <!-- CURRENT ORG / SELECT ORG-->
         <q-expansion-item
-        bordered
+          bordered
           expand-separator
           icon="mdi-office-building"
           :label="
@@ -58,13 +58,14 @@
               ? org.orgs.get(org.currentOrgUid).name
               : $t('orgs.drawer.select-organization')
           "
-          header-class="text-bold"
+          header-class="text-weight-bolder"
           :caption="
             org.currentOrgUid
               ? $t('orgs.drawer.current-organization')
               : $t('orgs.drawer.select-or-create-an-organization')
           "
         >
+          <!-- ADD ORAGNIZATION -->
           <q-item clickable @click="org.triggerNewOrgDialog">
             <q-item-section avatar>
               <q-icon name="mdi-office-building-plus" />
@@ -76,9 +77,12 @@
               </q-item-label>
             </q-item-section>
           </q-item>
+
           <!-- LIST ORGANIZATIONS -->
           <q-item header dense>
-            <div class="text-center full-width text-bold text-italic">{{$t("orgs.drawer.current-organizations")}}</div>
+            <div class="text-center full-width text-bold text-italic">
+              {{ $t("orgs.drawer.current-organizations") }}
+            </div>
           </q-item>
           <q-expansion-item
             v-for="[ix, item] in org.$state.orgs"
@@ -107,6 +111,7 @@
       </q-list>
       <!-- ORGANIZATION MANAGEMENT MENU -->
       <q-list v-if="org.currentOrgUid" bordered>
+        <!-- NEW ACTVITY -->
         <!-- LOGBOOK -->
         <q-expansion-item
           expand-separator
@@ -114,45 +119,48 @@
           :label="$t('orgs.drawer.logbook-label')"
           :caption="$t('orgs.drawer.logbook-caption')"
           group="org-management"
+          header-class="text-weight-medium"
         >
-          <q-item clickable @click="org.triggerNewOrgDialog">
+
+          <!-- ADD LOGBOOK ITEM -->
+          <q-item clickable @click="org.triggerNewLogbookEntryDialog">
             <q-item-section avatar>
               <q-icon name="mdi-notebook-plus" />
             </q-item-section>
             <q-item-section>
               <q-item-label>{{
-                $t("orgs.drawer.new-driver-label")
+                $t("orgs.drawer.new-logbook-entry-label")
               }}</q-item-label>
               <q-item-label caption>
-                {{ $t("orgs.drawer.new-driver-caption") }}
+                {{ $t("orgs.drawer.new-logbook-entry-caption") }}
               </q-item-label>
             </q-item-section>
           </q-item>
-          <!-- LIST LOGBOOK -->
-          <q-expansion-item
-            v-for="[ix, item] in org.$state.logbook"
-            :key="ix"
-            expand-icon-toggle
-            expand-separator
-            :label="item.name"
-            :caption="item.uid"
-            :to="'/org/' + item.uid"
-          >
-            <!-- LOGBOOK QUICKVIEW -->
-            <q-card>
-              <q-card-actions>
-                <!-- LOGBOOK QUICKVIEW CONTROLS -->
-                <q-btn
-                  flat
-                  icon="mdi-delete"
-                  size="sm"
-                  @click="org.delete(item.uid)"
-                  >{{ $t("nav.delete") }}</q-btn
-                >
-              </q-card-actions>
-            </q-card>
-          </q-expansion-item>
+
+         <!-- SEARCH LOGBOOK -->
+         <q-item>
+          <q-item-section avatar>
+              <q-icon name="mdi-book-search" />
+            </q-item-section>
+            <q-input label="Search Logbook"></q-input></q-item>
+
+          <!-- VIEW LOGBOOK ENTRIES -->
+          <q-item clickable :to="'/org/' + org.currentOrgUid + '/logbook'">
+            <q-item-section avatar>
+              <q-icon name="mdi-book-cog" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{
+                $t("orgs.drawer.logbook-dashboard-label")
+              }}</q-item-label>
+              <q-item-label caption>
+                {{ $t("orgs.drawer.logbook-dashboard-caption") }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
         </q-expansion-item>
+
         <!-- DRIVERS -->
         <q-expansion-item
           expand-separator
@@ -160,8 +168,11 @@
           :label="$t('orgs.drawer.drivers-label')"
           :caption="$t('orgs.drawer.drivers-caption')"
           group="org-management"
+          header-class="text-weight-medium"
         >
-          <q-item clickable @click="org.triggerNewOrgDialog">
+
+         <!-- ADD DRIVER -->
+          <q-item clickable @click="org.triggerNewDriverDialog">
             <q-item-section avatar>
               <q-icon name="mdi-sign-direction-plus" />
             </q-item-section>
@@ -174,9 +185,10 @@
               </q-item-label>
             </q-item-section>
           </q-item>
+
           <!-- LIST DRIVERS -->
           <q-expansion-item
-            v-for="[ix, item] in org.$state.drivers"
+            v-for="[ix, item] in org.$state.orgDrivers"
             :key="ix"
             expand-icon-toggle
             expand-separator
@@ -198,7 +210,23 @@
               </q-card-actions>
             </q-card>
           </q-expansion-item>
+
+          <!-- DRIVER DASHBOARD - BROWSE DRIVERS -->
+          <q-item clickable :to="'/org/' + org.currentOrgUid + '/members'">
+            <q-item-section avatar>
+              <q-icon name="mdi-view-dashboard-variant" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{
+                $t("orgs.drawer.drivers-dashboard-label")
+              }}</q-item-label>
+              <q-item-label caption>
+                {{ $t("orgs.drawer.drivers-dashboard-caption") }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
         </q-expansion-item>
+
         <!-- DOMAINS -->
         <q-expansion-item
           expand-separator
@@ -206,8 +234,10 @@
           :label="$t('orgs.drawer.domains-label')"
           :caption="$t('orgs.drawer.domains-caption')"
           group="org-management"
+          header-class="text-weight-medium"
         >
-          <q-item clickable @click="org.triggerNewOrgDialog">
+        <!-- ADD DOMAIN -->
+          <q-item clickable @click="org.triggerNewDomainDialog">
             <q-item-section avatar>
               <q-icon name="mdi-domain" />
             </q-item-section>
@@ -222,15 +252,15 @@
           </q-item>
           <!-- LIST DOMAINS -->
           <q-expansion-item
-            v-for="[ix, item] in org.$state.orgs"
+            v-for="[ix, item] in org.$state.orgDomains"
             :key="ix"
             expand-icon-toggle
             expand-separator
             :label="item.name"
             :caption="item.uid"
-            :to="'/org/' + item.uid"
+            :to="'/org/' + org.currentOrgUid + '/domain/' + item.uid"
           >
-            <!-- DOAMIN QUICKVIEW -->
+            <!-- DOMAIN QUICKVIEW -->
             <q-card>
               <q-card-actions>
                 <!-- DOMAIN QUICKVIEW CONTROLS -->
@@ -244,6 +274,94 @@
               </q-card-actions>
             </q-card>
           </q-expansion-item>
+          <!-- DOMAIN DASHBOARD - BROWSE DOMAINS -->
+          <q-item clickable :to="'/org/' + org.currentOrgUid + '/members'">
+            <q-item-section avatar>
+              <q-icon name="mdi-view-dashboard" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{
+                $t("orgs.drawer.domains-dashboard-label")
+              }}</q-item-label>
+              <q-item-label caption>
+                {{ $t("orgs.drawer.domains-dashboard-caption") }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
+
+        <!-- MEMBERS -->
+        <q-expansion-item
+          expand-separator
+          icon="mdi-account-multiple"
+          :label="$t('orgs.drawer.members-label')"
+          :caption="$t('orgs.drawer.members-caption')"
+          group="org-management"
+          header-class="text-weight-medium"
+        >
+          <!-- MEMBER SEARCH -->
+          <q-item>
+            <q-item-section avatar>
+              <q-icon name="mdi-account-search" />
+            </q-item-section>
+            <q-input label="Search Members"></q-input>
+
+          </q-item>
+
+          <!-- LIST SEARCH MEMBERS -->
+          <q-expansion-item
+            v-for="[ix, item] in org.$state.orgMembers"
+            :key="ix"
+            expand-icon-toggle
+            expand-separator
+            :label="item.name"
+            :caption="item.uid"
+            :to="'/org/' + org.currentOrgUid + '/member/' + item.uid"
+          >
+            <!-- MEMBER QUICKVIEW -->
+            <q-card>
+              <q-card-actions>
+                <!-- MEMBER QUICKVIEW CONTROLS -->
+                <q-btn
+                  flat
+                  icon="mdi-delete"
+                  size="sm"
+                  @click="org.delete(item.uid)"
+                  >{{ $t("nav.delete") }}</q-btn
+                >
+              </q-card-actions>
+            </q-card>
+          </q-expansion-item>
+
+          <!-- ADD MEMBER -->
+          <q-item clickable @click="org.triggerNewMemberDialog">
+            <q-item-section avatar>
+              <q-icon name="mdi-account-plus" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{
+                $t("orgs.drawer.new-member-label")
+              }}</q-item-label>
+              <q-item-label caption>
+                {{ $t("orgs.drawer.new-member-caption") }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <!-- MEMBERS DASHBOARD - BROWSE MEMBERS -->
+          <q-item clickable :to="'/org/' + org.currentOrgUid + '/members'">
+            <q-item-section avatar>
+              <q-icon name="mdi-account-group" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{
+                $t("orgs.drawer.members-dashboard-label")
+              }}</q-item-label>
+              <q-item-label caption>
+                {{ $t("orgs.drawer.members-dashboard-caption") }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
         </q-expansion-item>
       </q-list>
     </q-drawer>

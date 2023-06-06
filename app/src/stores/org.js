@@ -7,6 +7,10 @@ import { ref } from "vue";
 export const useOrgStore = defineStore("org", {
   state: () => ({
     orgs: useStorage("orgs", new Map()),
+    orgDomains: useStorage("orgDomains", new Map()),
+    orgDrivers: useStorage("orgDrivers", new Map()),
+    orgMembers: useStorage("orgMembers", new Map()),
+    orgNuggets: useStorage("orgNuggets", new Map()),
     currentOrgUid: useStorage("currentOrgUid", null),
     lastSynced: useStorage("lastSynced", null),
     fetching: false,
@@ -81,6 +85,10 @@ export const useOrgStore = defineStore("org", {
     },
     reset() {
       this.orgs = new Map();
+      this.orgDomains = new Map();
+      this.orgDrivers = new Map();
+      this.orgMembers = new Map();
+      this.orgNuggets = new Map();
       this.currentOrgUid = null;
       this.lastSynced = null;
       this.fetching = false;
