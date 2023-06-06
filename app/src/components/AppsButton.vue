@@ -188,11 +188,9 @@
 import { useI18n } from 'vue-i18n';
 
 import { useAuthStore } from '../stores/auth';
-import { useAccountStore } from '../stores/account';
 
 const auth = useAuthStore();
 
-const accounts = useAccountStore();
 
 if(!accounts.isSynced) {
   console.log('Please sync me')

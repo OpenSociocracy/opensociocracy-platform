@@ -5,6 +5,7 @@ import homepage from './homepage';
 import member from './member';
 import nav from './nav';
 import notifications from './notifications';
+import orgs from './orgs';
 import tos from './tos';
 
 export default {
@@ -15,5 +16,6 @@ export default {
   ...member,
   ...nav,
   ...notifications,
+  ...orgs,
   ...tos
 };

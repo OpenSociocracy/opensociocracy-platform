@@ -42,7 +42,7 @@ module.exports = configure(function (/* ctx */) {
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
       // 'ionicons-v4',
-      'mdi-v6',
+      'mdi-v7',
       // 'fontawesome-v6',
       // 'eva-icons',
       // 'themify',
@@ -114,7 +114,7 @@ module.exports = configure(function (/* ctx */) {
       // components: [],
       // directives: [],
 
-      iconSet: 'mdi-v6',
+      iconSet: 'mdi-v7',
 
       // Quasar plugins
       plugins: ['Dialog']

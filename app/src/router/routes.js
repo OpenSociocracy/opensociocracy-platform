@@ -17,6 +17,14 @@ const routes = [
   },
 
   {
+    path: '/org/:orgUid',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/OrgHomePage.vue') }
+    ]
+  },
+
+  {
     path: '/stores',
     component: () => import('layouts/MainLayout.vue'),
     children: [

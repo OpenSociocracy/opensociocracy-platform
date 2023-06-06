@@ -3,6 +3,7 @@ export default {
   'nav.home': 'Home',
   'nav.close': 'Close',
   'nav.communicate': 'Communicate',
+  'nav.delete': 'Delete',
   'nav.enter': 'Enter',
   'nav.language': 'Language',
   'nav.darkMode': 'Dark mode',

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { useStorage } from '@vueuse/core';
 
-export const useThemeStore = defineStore('prefs', {
+export const useThemeStore = defineStore('theme', {
   state: () => ({
     darkMode: useStorage('darkMode', false),
   }),

@@ -73,7 +73,6 @@
 <script setup language="ts">
 import { useAuthStore } from '../stores/auth';
 import { useThemeStore } from '../stores/theme';
-import { useAccountStore } from '../stores/account';
 
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
@@ -87,7 +86,6 @@ const router = useRouter();
 const $q = useQuasar();
 
 const auth = useAuthStore();
-const account = useAccountStore();
 
 const theme = useThemeStore();
 $q.dark.set(theme.darkMode);
