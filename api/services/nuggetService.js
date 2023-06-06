@@ -143,7 +143,31 @@ const NuggetService = (postgres) => {
     }
   }
 
-  return { createNuggetForLogbook, createNuggetWithLogbookEntry, getLogbookNugget };
+  const patchNugget = async (memberUid, nuggetUid, nuggetData) => {
+    const client = await postgres.connect();
+
+    const publicTitle = nuggetData.publicTitle ? nuggetData.publicTitle : '';
+    const internalName = nuggetData.internalName ? nuggetData.internalName : '';
+    try {
+      const {
+        rows,
+      } = await client.query(
+        ` SELECT *
+        FROM patch_nugget($1, $2, $3, $4)`,
+        [memberUid, nuggetUid, publicTitle, internalName]
+      );
+
+      console.log('SERVICE RESULT', rows)
+
+      // Note: avoid doing expensive computation here, this will block releasing the client
+      return rows[0] ;
+    } finally {
+      // Release the client immediately after query resolves, or upon error
+      client.release();
+    }
+  }
+
+  return { createNuggetForLogbook, createNuggetWithLogbookEntry, getLogbookNugget, patchNugget };
 };
 
 export default fp((server, options, next) => {

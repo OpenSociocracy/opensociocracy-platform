@@ -1,1 +1,27 @@
 // app global css in SCSS form
+// app global css in SCSS form
+.dialog-qbar {
+  background-color: $primary;
+  color: white;
+}
+.dialog-header {
+  font-size: x-large;
+}
+.dialog-body {
+  font-style: italic;
+  padding: 0 1em 0 1em;
+}
+.optional-form-action {
+  color: gray
+}
+
+.text-menuheader {
+  color: #000 !important;
+}
+.bg-menuheader {
+  background: #444 !important;
+}
+.navbar-link {
+  color: white;
+  text-decoration: none;
+}

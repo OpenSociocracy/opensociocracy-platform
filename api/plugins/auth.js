@@ -65,7 +65,7 @@ async function auth(server, options) {
       "authorization",
       "st-auth-mode",
     ],
-    methods: ["GET", "PUT", "POST", "DELETE"],
+    methods: ["GET", "PUT", "POST", "DELETE", "PATCH"],
     credentials: true,
   });
 
