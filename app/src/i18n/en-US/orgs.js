@@ -3,7 +3,7 @@ export default {
   'orgs.create-dialog.dialog-title': 'New Organization',
   'orgs.create-dialog.submit-button': 'Create',
   'orgs.create-dialog.create-form-title': 'Organization name',
-  'orgs.create-dialog.create-form-body': 'Enter a name between 2 and 64 characters.',
+  'orgs.create-dialog.create-form-body': 'Enter a name between 2 and 64 characters',
   'orgs.create-dialog.org-name-hint': 'New Organization Name',
   'orgs.drawer.current-organization': 'Current Organization',
   'orgs.drawer.current-organizations': 'Organizations',
@@ -15,10 +15,8 @@ export default {
   'orgs.drawer.drivers-dashboard-label': 'Driver Dashboard',
   'orgs.drawer.logbook-dashboard-caption': 'View logbook entries',
   'orgs.drawer.logbook-dashboard-label': 'Logbook Dashboard',
-
   'orgs.drawer.new-logbook-entry-caption': 'Create a logbook entry',
   'orgs.drawer.new-logbook-entry-label': 'Add to Logbook',
-
   'orgs.drawer.drivers-caption': 'Source of truth',
   'orgs.drawer.drivers-label': 'Drivers',
   'orgs.drawer.logbook-caption': 'Manage your activity',
@@ -35,6 +33,19 @@ export default {
   'orgs.drawer.new-member-label': 'Add Member',
   'orgs.drawer.select-organization': 'Select Organization',
   'orgs.drawer.select-or-create-an-organization': 'Select or add an organization',
+
+  'orgs.logbook-entry-dialog.title': 'Logbook Entry',
+  'orgs.logbook-entry-dialog.form-title': 'Provide title and type',
+  'orgs.logbook-entry-dialog.form-body': 'Enter a title and select the type below',
+  'orgs.logbook-entry-dialog.submit-button': 'Create Entry',
+  'orgs.logbook-entry-dialog.title-hint': 'Enter a title between 2 and 64 characters',
+  'orgs.logbook-entry-dialog.type.proposal': 'Proposal',
+  'orgs.logbook-entry-dialog.type.decision': 'Decision',
+  'orgs.logbook-entry-dialog.type.agreement': 'Agreement',
+  'orgs.logbook-entry-dialog.type.peer-review': 'Peer Review',
+  'orgs.logbook-entry-dialog.type-label': 'Entry Type',
+
+
   'orgs.new-org': 'Add Organization',
   'orgs.no-orgs': 'No Organizations found',
 };

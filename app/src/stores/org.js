@@ -91,6 +91,9 @@ export const useOrgStore = defineStore("org", {
     validateOrgName(orgName) {
       return orgName.length >= 2 && orgName.length <= 64;
     },
+    validateTitle(title) {
+      return title.length >= 2 && title.length <= 64;
+    },
     reset() {
       this.orgs = new Map();
       this.orgDomains = new Map();
