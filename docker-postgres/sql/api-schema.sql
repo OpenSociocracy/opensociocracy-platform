@@ -514,12 +514,12 @@ $$;
 -- Name: get_member_accounts(uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.get_member_accounts(uid_in uuid) RETURNS TABLE("accountUid" uuid, "createdAt" timestamp without time zone, name character varying, personal boolean)
+CREATE FUNCTION opensociocracy_api.get_member_accounts(uid_in uuid) RETURNS TABLE("accountUid" uuid, "createdAt" timestamp without time zone, name character varying)
     LANGUAGE plpgsql
     AS $$
 BEGIN
 	
-	RETURN QUERY (SELECT a.uid, a.created_at, a.name, a.personal  
+	RETURN QUERY (SELECT a.uid, a.created_at, a.name
 	FROM opensociocracy_api.account_member am 
 	INNER JOIN opensociocracy_api.account a ON a.id = am.account_id
 	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
@@ -627,7 +627,6 @@ BEGIN
 		
 	INSERT INTO opensociocracy_api.account_member(account_id, member_id, roles)
 		 VALUES(new_account_id, new_member_id, '{"owner"}');
-		 
 		 RETURN NEW;
 END;
 $$;
@@ -704,8 +703,7 @@ CREATE TABLE opensociocracy_api.account (
     id bigint NOT NULL,
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    name character varying(150),
-    personal boolean DEFAULT true
+    name character varying(150)
 );
 
 
@@ -1502,6 +1500,13 @@ GRANT ALL ON SEQUENCE opensociocracy_api.org_account_id_seq TO opensociocracy_su
 --
 
 GRANT ALL ON SEQUENCE opensociocracy_api.org_id_seq TO opensociocracy_supertokens;
+
+
+--
+-- Name: TABLE org_member; Type: ACL; Schema: opensociocracy_api; Owner: -
+--
+
+GRANT ALL ON TABLE opensociocracy_api.org_member TO opensociocracy_supertokens;
 
 
 --
