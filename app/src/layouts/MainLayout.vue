@@ -65,8 +65,8 @@
               : $t('orgs.drawer.select-or-create-an-organization')
           "
         >
-          <!-- ADD ORAGNIZATION -->
-          <q-item clickable @click="org.triggerNewOrgDialog">
+          <!-- ADD ORGANIZATION -->
+          <q-item clickable @click="org.triggerOrgCreateDialog">
             <q-item-section avatar>
               <q-icon name="mdi-office-building-plus" />
             </q-item-section>
@@ -79,7 +79,7 @@
           </q-item>
 
           <!-- LIST ORGANIZATIONS -->
-          <q-item header dense>
+          <q-item header dense v-if="org.$state.orgs.size > 0">
             <div class="text-center full-width text-bold text-italic">
               {{ $t("orgs.drawer.current-organizations") }}
             </div>
@@ -123,7 +123,7 @@
         >
 
           <!-- ADD LOGBOOK ITEM -->
-          <q-item clickable @click="org.triggerNewLogbookEntryDialog">
+          <q-item clickable @click="org.triggerOrgCreateLogbookEntryDialog">
             <q-item-section avatar>
               <q-icon name="mdi-notebook-plus" />
             </q-item-section>
@@ -372,7 +372,8 @@
         v-model="auth.signInRequired"
       ></PasswordlessAuthDialog>
       <WelcomeDialog v-model="auth.isNewMember"></WelcomeDialog>
-      <OrgCreateDialog v-model="org.showNewOrgDialog"></OrgCreateDialog>
+      <OrgCreateLogbookEntryDialog v-model="org.showOrgCreateLogbookEntryDialog"></OrgCreateLogbookEntryDialog>
+      <OrgCreateDialog v-model="org.showOrgCreateDialog"></OrgCreateDialog>
       <router-view />
     </q-page-container>
   </q-layout>
@@ -392,6 +393,7 @@ import PasswordlessAuthDialog from "../components/PasswordlessDialog.vue";
 import WelcomeDialog from "../components/WelcomeDialog.vue";
 
 import OrgCreateDialog from "../components/OrgCreateDialog.vue";
+import OrgCreateLogbookEntryDialog from "../components/OrgCreateLogbookEntryDialog.vue";
 
 const route = useRoute();
 const auth = useAuthStore();

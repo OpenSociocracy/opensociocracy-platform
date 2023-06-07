@@ -23,7 +23,7 @@ export default {
   'orgs.drawer.drivers-label': 'Drivers',
   'orgs.drawer.logbook-caption': 'Manage your activity',
   'orgs.drawer.logbook-label': 'Logbook',
-  'orgs.drawer.members-caption': 'Manage groups and members',
+  'orgs.drawer.members-caption': 'Members and permissons',
   'orgs.drawer.members-dashboard-caption': 'Access member data',
   'orgs.drawer.members-dashboard-label': 'Members Dashboard',
   'orgs.drawer.members-label': 'Members',

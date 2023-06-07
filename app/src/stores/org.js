@@ -14,7 +14,8 @@ export const useOrgStore = defineStore("org", {
     currentOrgUid: useStorage("currentOrgUid", null),
     lastSynced: useStorage("lastSynced", null),
     fetching: false,
-    showNewOrgDialog: false,
+    showOrgCreateDialog: false,
+    showOrgCreateLogbookEntryDialog: false,
     offline: new Map(),
   }),
   getters: {
@@ -51,6 +52,10 @@ export const useOrgStore = defineStore("org", {
     }
   },
   actions: {
+    isCurrentDialog(dialogName) {
+      console.log(dialogName)
+      return dialogName == this.currentDialog ? true : false;
+    },
     async createOrg(name) {
       // Save it locally in orgs with a local Uid
       const localOrgUid = nanoid();
@@ -64,7 +69,7 @@ export const useOrgStore = defineStore("org", {
 
       // POST an org
 
-      this.showNewOrgDialog = false;
+     this.showOrgCreateDialog = null;
 
       return orgData;
     },
@@ -77,8 +82,11 @@ export const useOrgStore = defineStore("org", {
     setCurrentOrg(uid) {
       this.currentOrgUid = uid;
     },
-    triggerNewOrgDialog() {
-      this.showNewOrgDialog = true;
+    triggerOrgCreateDialog() {
+      this.showOrgCreateDialog = true;
+    },
+    triggerOrgCreateLogbookEntryDialog() {
+      this.showOrgCreateLogbookEntryDialog = true;
     },
     validateOrgName(orgName) {
       return orgName.length >= 2 && orgName.length <= 64;
@@ -92,7 +100,7 @@ export const useOrgStore = defineStore("org", {
       this.currentOrgUid = null;
       this.lastSynced = null;
       this.fetching = false;
-      this.showNewOrgDialog = false;
+      this.showOrgCreateDialog = false;
       this.offline = new Map();
     },
   },
