@@ -40,14 +40,14 @@ async function entryEntryCreateRoutes(server, options) {
       return result;
     }
   );
-  server.put(
+  server.patch(
     "/entries/:logbookEntryUid",
     {
       preHandler: verifySession(),
       schema: {
         description: "Update a logbook entry",
         tags: ["entries"],
-        summary: "Add a new entry to the logbook",
+        summary: "Update a logbook entry",
         body: {
           type: "object",
           properties: {
@@ -63,8 +63,7 @@ async function entryEntryCreateRoutes(server, options) {
             type: "object",
             properties: {
               entryEntryUid: { type: "string" },
-              createdAt: { type: "string" },
-              nuggetUid: { type: "string" }
+              updatedAt: { type: "string" },
             },
           },
         },
