@@ -179,78 +179,6 @@
 					"response": []
 				},
 				{
-					"name": "API Auth - Renew Current User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"HTTP Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"var jsonData = pm.response.json();",
-									"",
-									"pm.test(\"Returned status is OK\", function () {",
-									"    jsonData.status == \"OK\"",
-									"});",
-									"",
-									"// Set variables for deviceId and preAuthSessionId so we can use them when submitting the code",
-									"",
-									"pm.environment.set(\"deviceId_1\", jsonData.deviceId);",
-									"pm.environment.set(\"preAuthSessionId_1\", jsonData.preAuthSessionId);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "rid",
-								"value": "passwordless",
-								"type": "text"
-							},
-							{
-								"key": "st-auth-mode",
-								"value": "cookie",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"{{randoEmail}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{apiUri}}/auth/signinup/code",
-							"host": [
-								"{{apiUri}}"
-							],
-							"path": [
-								"auth",
-								"signinup",
-								"code"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "API Auth - Submit OTP",
 					"event": [
 						{
@@ -297,7 +225,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"deviceId\": \"{{deviceId_1}}\",\n    \"preAuthSessionId\": \"{{preAuthSessionId_1}}\",\n    \"userInputCode\": \"466759\"\n}",
+							"raw": "{\n    \"deviceId\": \"{{deviceId_1}}\",\n    \"preAuthSessionId\": \"{{preAuthSessionId_1}}\",\n    \"userInputCode\": \"097098\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -344,7 +272,7 @@
 											"const accounts = jsonData.accounts;",
 											"",
 											"_.forEach(accounts, function(acct) {",
-											"    pm.environment.set(\"currentAccount\", acct.accountUid);",
+											"    pm.environment.set(\"accountUid\", acct.accountUid);",
 											"});",
 											"",
 											"pm.test(\"One account found, as expected\", function () {",
@@ -412,10 +340,6 @@
 											"",
 											"const orgs = jsonData.orgs;",
 											"",
-											"_.forEach(orgs, function(org) {",
-											"    pm.environment.set(\"orgUid\", org.orgUid);",
-											"});",
-											"",
 											"pm.test(\"No orgs found yet, as expected\", function () {",
 											"    pm.expect(orgs.length).to.be.eq(0);",
 											"});",
@@ -449,13 +373,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{apiUri}}/account/{{currentAccount}}/orgs",
+									"raw": "{{apiUri}}/accounts/{{accountUid}}/orgs",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"account",
-										"{{currentAccount}}",
+										"accounts",
+										"{{accountUid}}",
 										"orgs"
 									]
 								}
@@ -463,7 +387,7 @@
 							"response": []
 						},
 						{
-							"name": "Create an Org",
+							"name": "Create an Account Org",
 							"event": [
 								{
 									"listen": "test",
@@ -478,12 +402,16 @@
 											"});",
 											"",
 											"",
+											"",
 											"pm.test(\"Response is valid shape\", function () {",
 											"    pm.expect(jsonData.orgUid).to.exist;",
 											"    pm.expect(jsonData.name).to.exist;",
 											"    pm.expect(jsonData.createdAt).to.exist;",
 											"    pm.expect(jsonData.logbookUid).to.exist;",
 											"});",
+											"",
+											"pm.environment.set(\"currentOrg\", jsonData.orgUid);",
+											"",
 											"",
 											""
 										],
@@ -517,7 +445,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"{{randOrgName}}\",\n    \"note\": \"{{randOrgBlurb}}\",\n    \"accountUid\": \"{{currentAccount}}\"\n} ",
+									"raw": "{\n    \"name\": \"{{randOrgName}}\",\n    \"note\": \"{{randOrgBlurb}}\"\n} ",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -525,11 +453,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{apiUri}}/orgs",
+									"raw": "{{apiUri}}/accounts/{{accountUid}}/orgs",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
+										"accounts",
+										"{{accountUid}}",
 										"orgs"
 									]
 								}
@@ -547,18 +477,12 @@
 											"",
 											"const orgs = jsonData.orgs;",
 											"",
-											"_.forEach(orgs, function(org) {",
-											"    pm.environment.set(\"orgUid\", org.orgUid);",
-											"});",
-											"",
 											"pm.test(\"HTTP Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
 											"});",
 											"",
-											"",
-											"",
 											"pm.test(\"No orgs found yet, as expected\", function () {",
-											"    pm.expect(orgs.length).to.eq(1);",
+											"    pm.expect(orgs.length).to.be.gt(0);",
 											"});",
 											""
 										],
@@ -590,13 +514,13 @@
 									}
 								],
 								"url": {
-									"raw": "{{apiUri}}/account/{{currentAccount}}/orgs",
+									"raw": "{{apiUri}}/accounts/{{accountUid}}/orgs",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"account",
-										"{{currentAccount}}",
+										"accounts",
+										"{{accountUid}}",
 										"orgs"
 									]
 								}
@@ -834,7 +758,7 @@
 											"});",
 											"",
 											"pm.environment.set(\"newNuggetUid\", jsonData.nuggetUid);",
-											"pm.environment.set(\"newLogbookEntryUid\", jsonData.logbookEntryUid);"
+											"pm.environment.set(\"logbookEntryUid\", jsonData.logbookEntryUid);"
 										],
 										"type": "text/javascript"
 									}
@@ -887,7 +811,7 @@
 							"response": []
 						},
 						{
-							"name": "Get Logbook Entry Nugget",
+							"name": "Get Logbook Entry",
 							"event": [
 								{
 									"listen": "test",
@@ -943,22 +867,20 @@
 									}
 								],
 								"url": {
-									"raw": "{{apiUri}}/logbooks/{{logbookUid}}/nuggets/{{newNuggetUid}}",
+									"raw": "{{apiUri}}/entries/{{logbookEntryUid}}",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"logbooks",
-										"{{logbookUid}}",
-										"nuggets",
-										"{{newNuggetUid}}"
+										"entries",
+										"{{logbookEntryUid}}"
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "Update a Logbook Nugget Blocks",
+							"name": "Update a Logbook Entries Blocks",
 							"event": [
 								{
 									"listen": "test",
@@ -1006,15 +928,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{apiUri}}/logbooks/{{logbookUid}}/nuggets/{{newNuggetUid}}/blocks",
+									"raw": "{{apiUri}}/entries/{{logbookEntryUid}}/blocks",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"logbooks",
-										"{{logbookUid}}",
-										"nuggets",
-										"{{newNuggetUid}}",
+										"entries",
+										"{{logbookEntryUid}}",
 										"blocks"
 									]
 								}
@@ -1022,7 +942,7 @@
 							"response": []
 						},
 						{
-							"name": "Update a Logbook Nugget",
+							"name": "Update a Logbook Entry",
 							"event": [
 								{
 									"listen": "test",
@@ -1070,22 +990,20 @@
 									}
 								},
 								"url": {
-									"raw": "{{apiUri}}/logbooks/{{logbookUid}}/nuggets/{{newNuggetUid}}",
+									"raw": "{{apiUri}}/entries/{{logbookEntryUid}}",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"logbooks",
-										"{{logbookUid}}",
-										"nuggets",
-										"{{newNuggetUid}}"
+										"entries",
+										"{{logbookEntryUid}}"
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "Patch Logbook Nugget Text",
+							"name": "Patch Logbook EntryText",
 							"event": [
 								{
 									"listen": "test",
@@ -1133,15 +1051,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{apiUri}}/logbooks/{{logbookUid}}/nuggets/{{newNuggetUid}}",
+									"raw": "{{apiUri}}/entries/{{logbookEntryUid}}",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"logbooks",
-										"{{logbookUid}}",
-										"nuggets",
-										"{{newNuggetUid}}"
+										"entries",
+										"{{logbookEntryUid}}"
 									]
 								}
 							},

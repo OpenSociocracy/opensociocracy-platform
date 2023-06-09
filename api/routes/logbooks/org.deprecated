@@ -34,4 +34,4 @@ async function logbookOrganizationsRoutes(server, options) {
   });
 }
 
-export default fastifyPlugin(logbookOrganizationsRoutes);
+export default fastifyPlugin(logbookOrganizationsRoutes);  
