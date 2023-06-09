@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "6608d3fc-e9f3-46f8-a049-7d6f4fdef8b5",
-		"name": "Basic OpenSocioracy Tests",
+		"name": "Basic OpenSocioracy Simplified Tests",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "27760",
 		"_collection_link": "https://ultrinet.postman.co/workspace/OpenSociocracy~91847678-48b8-4506-a363-e2ef05526962/collection/27760-6608d3fc-e9f3-46f8-a049-7d6f4fdef8b5?action=share&creator=27760&source=collection_link"
@@ -325,172 +325,11 @@
 			"name": "BASIC FLOW",
 			"item": [
 				{
-					"name": "ACCOUNTS",
+					"name": "GET ACCOUNT INFO",
 					"item": [
 						{
-							"name": "Get member accounts",
+							"name": "Get Accounts",
 							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											""
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"const jsonData = pm.response.json();",
-											"",
-											"const accounts = jsonData.accounts;",
-											"",
-											"_.forEach(accounts, function(account) {",
-											"  if(account.personal == false) {",
-											"    pm.environment.set(\"currentAccount\", account.accountUid);",
-											"  }",
-											"    if(account.personal) {",
-											"        pm.test(\"Personal account found\", function () {",
-											"            pm.expect(account.personal).to.be.true;",
-											"        });",
-											"    }",
-											"",
-											"    ",
-											"});",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true,
-								"disabledSystemHeaders": {}
-							},
-							"request": {
-								"auth": {
-									"type": "noauth"
-								},
-								"method": "GET",
-								"header": [
-									{
-										"key": "rid",
-										"value": "passwordless",
-										"type": "text"
-									},
-									{
-										"key": "st-auth-mode",
-										"value": "cookie",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{apiUri}}/accounts",
-									"host": [
-										"{{apiUri}}"
-									],
-									"path": [
-										"accounts"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create account",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"HTTP Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"var jsonData = pm.response.json();",
-											"pm.environment.set(\"currentAccount\", jsonData.uid);",
-											"",
-											"pm.test(\"UUID found\", function () {",
-											"    pm.expect(jsonData.uid).to.exist;",
-											"});",
-											"",
-											"pm.test(\"Returned status is OK\", function () {",
-											"    jsonData.status == \"OK\"",
-											"});",
-											""
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"pm.environment.set(\"randAcctName\", 'ACCT ' + pm.variables.replaceIn('{{$randomCompanyName}}'));",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "rid",
-										"value": "passwordless",
-										"type": "text"
-									},
-									{
-										"key": "st-auth-mode",
-										"value": "cookie",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"name\": \"{{randAcctName}}\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{apiUri}}/accounts",
-									"host": [
-										"{{apiUri}}"
-									],
-									"path": [
-										"accounts"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Check for new account",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											""
-										],
-										"type": "text/javascript"
-									}
-								},
 								{
 									"listen": "test",
 									"script": {
@@ -504,23 +343,29 @@
 											"",
 											"const accounts = jsonData.accounts;",
 											"",
-											"pm.test(\"More than one account found\", function () {",
-											"    pm.expect(accounts.length).to.be.greaterThan(1);",
+											"_.forEach(accounts, function(acct) {",
+											"    pm.environment.set(\"currentAccount\", acct.accountUid);",
 											"});",
+											"",
+											"pm.test(\"One account found, as expected\", function () {",
+											"    pm.expect(accounts.length).to.be.eq(1);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
 											""
 										],
 										"type": "text/javascript"
 									}
 								}
 							],
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true,
-								"disabledSystemHeaders": {}
-							},
 							"request": {
-								"auth": {
-									"type": "noauth"
-								},
 								"method": "GET",
 								"header": [
 									{
@@ -534,15 +379,6 @@
 										"type": "text"
 									}
 								],
-								"body": {
-									"mode": "raw",
-									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
 								"url": {
 									"raw": "{{apiUri}}/accounts",
 									"host": [
@@ -613,14 +449,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{apiUri}}/orgs/account/{{currentAccount}}",
+									"raw": "{{apiUri}}/account/{{currentAccount}}/orgs",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"orgs",
 										"account",
-										"{{currentAccount}}"
+										"{{currentAccount}}",
+										"orgs"
 									]
 								}
 							},
@@ -681,7 +517,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"{{randOrgName}}\",\n    \"note\": \"{{randOrgBlurb}}\",\n    \"accountUid\": \"{{currentAccount}}\"\n}",
+									"raw": "{\n    \"name\": \"{{randOrgName}}\",\n    \"note\": \"{{randOrgBlurb}}\",\n    \"accountUid\": \"{{currentAccount}}\"\n} ",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -701,7 +537,7 @@
 							"response": []
 						},
 						{
-							"name": "Check for new Org",
+							"name": "Check for new org",
 							"event": [
 								{
 									"listen": "test",
@@ -722,7 +558,7 @@
 											"",
 											"",
 											"pm.test(\"No orgs found yet, as expected\", function () {",
-											"    pm.expect(orgs.length).to.be.gt(0);",
+											"    pm.expect(orgs.length).to.eq(1);",
 											"});",
 											""
 										],
@@ -754,14 +590,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{apiUri}}/orgs/account/{{currentAccount}}",
+									"raw": "{{apiUri}}/account/{{currentAccount}}/orgs",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"orgs",
 										"account",
-										"{{currentAccount}}"
+										"{{currentAccount}}",
+										"orgs"
 									]
 								}
 							},
@@ -793,7 +629,7 @@
 											"",
 											"",
 											"_.forEach(logbooks, function(logbook) {",
-											"    pm.environment.set(\"logbookUid\", logbook.logbookUid);",
+											"    pm.environment.set(\"currentLogbook\", logbook.logbookUid);",
 											"});",
 											""
 										],
@@ -825,14 +661,14 @@
 									}
 								],
 								"url": {
-									"raw": "{{apiUri}}/logbooks/org/{{orgUid}}",
+									"raw": "{{apiUri}}/org/{{orgUid}}/logbooks",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"logbooks",
 										"org",
-										"{{orgUid}}"
+										"{{orgUid}}",
+										"logbooks"
 									]
 								}
 							},
@@ -1289,7 +1125,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"nugget\": {\n        \"pubAt\": \"2023-11-25\"\n    }\n}",
+									"raw": "{\n    \"nugget\": {\n        \"internalName\": \"My Really New Name\"\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1480,12 +1316,12 @@
 									}
 								},
 								"url": {
-									"raw": "{{apiUri}}/nuggets/{{nuggetUid}}",
+									"raw": "{{apiUri}}/nugget/{{nuggetUid}}",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"nuggets",
+										"nugget",
 										"{{nuggetUid}}"
 									]
 								}

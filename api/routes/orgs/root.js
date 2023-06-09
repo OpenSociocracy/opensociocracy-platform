@@ -41,6 +41,34 @@ async function orgCreateRoutes(server, options) {
       return result;
     }
   );
+  server.get("/orgs",
+  {
+    preHandler: verifySession(),
+    schema: {
+      description:
+        "Get Organizations for an Account",
+      tags: ["orgs"],
+      summary: "Get all organizations for a given account",
+      response: {
+        200: {
+          description: "Success Response",
+          type: "object",
+          properties: {
+            orgs: { type: "array" },
+          },
+        },
+      },
+    },
+  },
+  async (request, reply) => {
+    let memberUid = request.session.getUserId();
+
+    const orgs = await server.orgService.getMemberOrgs(memberUid);
+
+    return {
+      orgs: orgs,
+    };
+  });
 }
 
 export default fastifyPlugin(orgCreateRoutes);

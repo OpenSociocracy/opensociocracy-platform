@@ -32,7 +32,9 @@ CREATE TYPE opensociocracy_api.account_roles AS ENUM (
     'member-admin',
     'billing-admin',
     'viewer',
-    'editor'
+    'editor',
+    'org-admin',
+    'admin'
 );
 
 
@@ -117,8 +119,8 @@ DECLARE new_account_created_at timestamp without time zone;
 
 BEGIN
     
-	INSERT INTO opensociocracy_api.account(name, personal)
-		 VALUES(name_in, false)
+	INSERT INTO opensociocracy_api.account(name)
+		 VALUES(name_in)
 		 RETURNING opensociocracy_api.account.id, opensociocracy_api.account.uid, opensociocracy_api.account.created_at INTO new_account_id, new_account_uid, new_account_created_at;
 		
 	INSERT INTO opensociocracy_api.account_member(account_id, member_id , roles)
@@ -557,6 +559,24 @@ INNER JOIN opensociocracy_api.nugget n ON n.account_id = am.account_id
 WHERE m.uid = member_uid_in
 AND n.nugget_type = nugget_type_in;
 END;
+$$;
+
+
+--
+-- Name: get_member_orgs(uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_member_orgs(member_uid_in uuid) RETURNS TABLE("orgUid" uuid, "createdAt" timestamp without time zone, name character varying, note text)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	RETURN QUERY (SELECT o.uid, o.created_at, o.name, o.note
+	FROM opensociocracy_api.org o 
+	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
+	INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in );
+END; 
 $$;
 
 
