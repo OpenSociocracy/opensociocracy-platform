@@ -454,6 +454,39 @@ $$;
 
 
 --
+-- Name: get_logbook_entry(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_logbook_entry(member_uid_in uuid, logbook_entry_uid_in uuid) RETURNS TABLE("logbookEntryUid" uuid, "createdAt" timestamp without time zone, "updatedAt" timestamp without time zone, note text, "pubAt" timestamp with time zone, "unPubAt" timestamp with time zone, "publicTitle" character varying, "internalName" character varying, blocks jsonb, "nuggetType" opensociocracy_api.nugget_types)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT 
+				  le.uid, 
+				  le.created_at, 
+				  le.updated_at, 
+				  le.note, 
+				  n.pub_at,
+				  n.un_pub_at,
+				  n.public_title,
+				  n.internal_name,
+				  n.blocks,
+				  n.nugget_type
+	FROM opensociocracy_api.logbook_entry le
+	LEFT JOIN nugget n ON n.id = le.nugget_id
+    INNER JOIN opensociocracy_api.logbook l ON l.id = le.logbook_id
+	INNER JOIN opensociocracy_api.org o ON o.id = l.org_id
+	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
+	INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in
+ 	AND le.uid = logbook_entry_uid_in );
+END
+$$;
+
+
+--
 -- Name: get_logbook_nugget(uuid, uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -675,6 +708,20 @@ $$;
 
 
 --
+-- Name: set_logbook_entry_updated_at(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.set_logbook_entry_updated_at() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$;
+
+
+--
 -- Name: set_nugget_updated_at(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -795,7 +842,8 @@ CREATE TABLE opensociocracy_api.logbook_entry (
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     logbook_id bigint,
     note text,
-    nugget_id bigint
+    nugget_id bigint,
+    updated_at timestamp without time zone
 );
 
 

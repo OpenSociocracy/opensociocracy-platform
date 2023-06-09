@@ -1,7 +1,7 @@
 import fastifyPlugin from "fastify-plugin";
 import { verifySession } from "supertokens-node/recipe/session/framework/fastify/index.js";
 
-async function logbookEntryRoutes(server, options) {
+async function logbookEntriesRoutes(server, options) {
   server.get(
     "/logbooks/:logbookUid/entries",
     {
@@ -56,8 +56,7 @@ async function logbookEntryRoutes(server, options) {
             type: "object",
             properties: {
               logbookEntryUid: { type: "string" },
-              createdAt: { type: "string" },
-              nuggetUid: { type: "string" }
+              createdAt: { type: "string" }
             },
           },
         },
@@ -89,4 +88,4 @@ async function logbookEntryRoutes(server, options) {
 
 }
 
-export default fastifyPlugin(logbookEntryRoutes);
+export default fastifyPlugin(logbookEntriesRoutes);

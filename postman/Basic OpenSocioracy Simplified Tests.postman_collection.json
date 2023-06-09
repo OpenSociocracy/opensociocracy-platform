@@ -410,7 +410,6 @@
 											"    pm.expect(jsonData.logbookUid).to.exist;",
 											"});",
 											"",
-											"pm.environment.set(\"currentOrg\", jsonData.orgUid);",
 											"",
 											"",
 											""
@@ -551,10 +550,6 @@
 											"    pm.expect(logbooks.length).to.be.greaterThan(0);",
 											"});",
 											"",
-											"",
-											"_.forEach(logbooks, function(logbook) {",
-											"    pm.environment.set(\"currentLogbook\", logbook.logbookUid);",
-											"});",
 											""
 										],
 										"type": "text/javascript"
@@ -739,7 +734,7 @@
 					"name": "LOGBOOK NUGGETS",
 					"item": [
 						{
-							"name": "Create a Logbook Nugget",
+							"name": "Create a Logbook Entry",
 							"event": [
 								{
 									"listen": "test",
@@ -754,10 +749,8 @@
 											"pm.test(\"Has proper fields\", function () {",
 											"    pm.expect(jsonData.logbookEntryUid).to.exist;",
 											"    pm.expect(jsonData.createdAt).to.exist;",
-											"    pm.expect(jsonData.nuggetUid).to.exist;",
 											"});",
 											"",
-											"pm.environment.set(\"newNuggetUid\", jsonData.nuggetUid);",
 											"pm.environment.set(\"logbookEntryUid\", jsonData.logbookEntryUid);"
 										],
 										"type": "text/javascript"

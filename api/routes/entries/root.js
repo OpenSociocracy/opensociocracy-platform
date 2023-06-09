@@ -3,44 +3,51 @@ import { verifySession } from "supertokens-node/recipe/session/framework/fastify
 
 async function entryEntryCreateRoutes(server, options) {
   server.get(
-    "/entries/:entryUid",
+    "/entries/:logbookEntryUid",
     {
       preHandler: verifySession(),
       schema: {
-        description: "Get a entry",
+        description: "Get a logbook entry",
         tags: ["entries"],
-        summary: "Get a entry.",
+        summary: "Get a single logbook entry.",
         response: {
           200: {
             description: "Success Response",
             type: "object",
             properties: {
-              entryEntryUid: { type: "string" },
+              logbookEntryUid: { type: "string" },
               createdAt: { type: "string" },
-              nuggetUid: { type: "string" }
+              updatedAt: { type: "string" },
+              note: { type: "string" },
+              pubAt: { type: "string" },
+              unPubAt: { type: "string" },
+              publicTitle: { type: "string" },
+              internalName: { type: "string" },
+              blocks: { type: "array" },
+              nuggetType: { type: "string" }
             },
           },
         },
       },
     },
-    async (req, reply) => {
-      const memberUid = req.session.getUserId();
+    async (request, reply) => {
+      const memberUid = request.session.getUserId();
 
-      const entryUid = req.params.entryUid;
+      const logbookEntryUid = request.params.logbookEntryUid;
 
-      const result = await server.entryService.getEntry(memberUid, entryUid);
+      const result = await server.logbookEntryService.getLogbookEntry(memberUid, logbookEntryUid);
 
       return result;
     }
   );
-  server.post(
-    "/entries/:entryUid",
+  server.put(
+    "/entries/:logbookEntryUid",
     {
       preHandler: verifySession(),
       schema: {
-        description: "Create a new entry entry",
+        description: "Update a logbook entry",
         tags: ["entries"],
-        summary: "Add a new entry to the entry",
+        summary: "Add a new entry to the logbook",
         body: {
           type: "object",
           properties: {
@@ -63,10 +70,12 @@ async function entryEntryCreateRoutes(server, options) {
         },
       },
     },
-    async (req, reply) => {
-      const memberUid = req.session.getUserId();
+    async (request, reply) => {
+      const memberUid = request.session.getUserId();
 
-      const result = await server.entryService.createEntry(memberUid, req.body);
+      const logbookEntryUid = request.params.logbookEntryUid;
+
+      const result = await server.entryService.updateEntry(memberUid, logbookEntryUid, request.body);
 
       return result;
     }
