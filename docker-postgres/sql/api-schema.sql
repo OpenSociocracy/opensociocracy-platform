@@ -828,7 +828,8 @@ CREATE TABLE opensociocracy_api.comment (
     id bigint NOT NULL,
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     "created_at " timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    nugget_id bigint NOT NULL
+    nugget_id bigint NOT NULL,
+    updated_at timestamp without time zone
 );
 
 
@@ -1303,6 +1304,13 @@ ALTER TABLE ONLY opensociocracy_api.org
 
 ALTER TABLE ONLY opensociocracy_api.response
     ADD CONSTRAINT uq_response_uid UNIQUE (uid);
+
+
+--
+-- Name: comment set_comment_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TRIGGER set_comment_updated_at BEFORE UPDATE ON opensociocracy_api.comment FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_updated_at();
 
 
 --
