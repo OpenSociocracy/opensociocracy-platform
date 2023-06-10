@@ -722,24 +722,24 @@ $$;
 
 
 --
--- Name: set_logbook_entry_updated_at(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+-- Name: set_reacted_at(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.set_logbook_entry_updated_at() RETURNS trigger
+CREATE FUNCTION opensociocracy_api.set_reacted_at() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-    NEW.updated_at = now();
+    NEW.reacted_at = now();
     RETURN NEW;
 END;
 $$;
 
 
 --
--- Name: set_nugget_updated_at(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+-- Name: set_updated_at(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.set_nugget_updated_at() RETURNS trigger
+CREATE FUNCTION opensociocracy_api.set_updated_at() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -828,7 +828,6 @@ CREATE TABLE opensociocracy_api.comment (
     id bigint NOT NULL,
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     "created_at " timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    org_id bigint NOT NULL,
     nugget_id bigint NOT NULL
 );
 
@@ -1060,8 +1059,8 @@ CREATE TABLE opensociocracy_api.org_member (
 
 CREATE TABLE opensociocracy_api.reaction (
     nugget_id bigint NOT NULL,
-    org_id bigint NOT NULL,
-    member_id bigint NOT NULL
+    member_id bigint NOT NULL,
+    reacted_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -1219,14 +1218,6 @@ ALTER TABLE ONLY opensociocracy_api.nugget
 
 
 --
--- Name: reaction nugget_reaction_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.reaction
-    ADD CONSTRAINT nugget_reaction_pkey PRIMARY KEY (nugget_id, org_id, member_id);
-
-
---
 -- Name: org_member org_member_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
@@ -1318,14 +1309,14 @@ ALTER TABLE ONLY opensociocracy_api.response
 -- Name: logbook_entry set_logbook_entry_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE TRIGGER set_logbook_entry_updated_at BEFORE UPDATE ON opensociocracy_api.logbook_entry FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_logbook_entry_updated_at();
+CREATE TRIGGER set_logbook_entry_updated_at BEFORE UPDATE ON opensociocracy_api.logbook_entry FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_updated_at();
 
 
 --
 -- Name: nugget set_nugget_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE TRIGGER set_nugget_updated_at BEFORE UPDATE ON opensociocracy_api.nugget FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_nugget_updated_at();
+CREATE TRIGGER set_nugget_updated_at BEFORE UPDATE ON opensociocracy_api.nugget FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_updated_at();
 
 
 --
@@ -1350,14 +1341,6 @@ ALTER TABLE ONLY opensociocracy_api.account_member
 
 ALTER TABLE ONLY opensociocracy_api.comment
     ADD CONSTRAINT fk_comment_nugget_id FOREIGN KEY (nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
-
-
---
--- Name: comment fk_comment_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.comment
-    ADD CONSTRAINT fk_comment_org_id FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id) NOT VALID;
 
 
 --
@@ -1430,14 +1413,6 @@ ALTER TABLE ONLY opensociocracy_api.reaction
 
 ALTER TABLE ONLY opensociocracy_api.reaction
     ADD CONSTRAINT fk_reaction_nugget_id FOREIGN KEY (nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
-
-
---
--- Name: reaction fk_reaction_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.reaction
-    ADD CONSTRAINT fk_reaction_org_id FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id) NOT VALID;
 
 
 --
