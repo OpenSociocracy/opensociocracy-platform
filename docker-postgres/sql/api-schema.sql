@@ -508,7 +508,7 @@ BEGIN
 				  cn.nugget_type
 	FROM logbook_entry le
 	LEFT JOIN nugget n ON n.id = le.nugget_id
-	LEFT JOIN comment c ON c.target_nugget_id = n.id
+	JOIN comment c ON c.target_nugget_id = n.id
     LEFT JOIN nugget cn ON cn.id = c.data_nugget_id
     INNER JOIN logbook l ON l.id = le.logbook_id
 	INNER JOIN org o ON o.id = l.org_id

@@ -13,18 +13,9 @@ async function entryEntryCreateRoutes(server, options) {
         response: {
           200: {
             description: "Success Response",
-            type: "array",
+            type: "object",
             properties: {
-              logbookEntryUid: { type: "string" },
-              createdAt: { type: "string" },
-              updatedAt: { type: "string" },
-              note: { type: "string" },
-              pubAt: { type: "string" },
-              unPubAt: { type: "string" },
-              publicTitle: { type: "string" },
-              internalName: { type: "string" },
-              blocks: { type: "array" },
-              nuggetType: { type: "string" }
+              comments: { type: "array" },
             },
           },
         },
@@ -36,7 +27,60 @@ async function entryEntryCreateRoutes(server, options) {
       const logbookEntryUid = request.params.logbookEntryUid;
 
       const result = await server.commentService.getLogbookEntryComments(memberUid, logbookEntryUid);
-console.log('RESULT', result)
+
+      return {comments: result };
+    }
+  );
+
+  server.post(
+    "/entries/:logbookEntryUid/comments",
+    {
+      preHandler: verifySession(),
+      schema: {
+        description: "Create a new logbook entry comment",
+        tags: ["logbooks"],
+        summary: "Comment on a logbook entry",
+        body: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+              description: "The name for the logbook",
+              },
+          },
+        },
+        response: {
+          200: {
+            description: "Success Response",
+            type: "object",
+            properties: {
+              commentUid: { type: "string" },
+              createdAt: { type: "string" }
+            },
+          },
+        },
+      },
+    },
+    async (req, reply) => {
+      const memberUid = req.session.getUserId();
+
+      const logbookEntryUid = req.params.logbookEntryUid;
+
+      let result;
+
+      let metaData = {};
+      metaData.note = req.body.note ? req.body.note : null;
+
+      // If there is nugget data, we need to create the nugget first.
+      if(req.body.nugget)  {
+
+        // Use the logbookUid to get the proper org_id
+        result = await server.nuggetService.createNuggetWithComment(memberUid, logbookEntryUid, metaData, req.body.nugget);
+
+      } else {
+        result = await server.commentService.createComment(memberUid, logbookEntryUid, metaData);
+      }
+
       return result;
     }
   );

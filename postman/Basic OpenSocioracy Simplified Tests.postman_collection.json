@@ -179,6 +179,77 @@
 					"response": []
 				},
 				{
+					"name": "API Auth - Email Password Signup",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Returned status is OK\", function () {",
+									"    jsonData.status == \"OK\"",
+									"});",
+									"",
+									"// Set variables for deviceId and preAuthSessionId so we can use them when submitting the code",
+									"",
+									"pm.environment.set(\"deviceId_1\", jsonData.deviceId);",
+									"pm.environment.set(\"preAuthSessionId_1\", jsonData.preAuthSessionId);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"randoEmail\", pm.variables.replaceIn('{{$randomExampleEmail}}'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "rid",
+								"value": "emailpassword",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"formFields\": [\n        {\n            \"id\": \"email\",\n            \"value\": \"{{randoEmail}}\"\n        },\n        {\n            \"id\": \"password\",\n            \"value\": \"password123\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/auth/signup",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "API Auth - Submit OTP",
 					"event": [
 						{
@@ -242,6 +313,74 @@
 								"signinup",
 								"code",
 								"consume"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API Auth - Refresh session - missing?",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Returned status is OK\", function () {",
+									"    jsonData.status == \"OK\"",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"randoEmail\", pm.variables.replaceIn('{{$randomExampleEmail}}'));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "rid",
+								"value": "passwordless",
+								"type": "text"
+							},
+							{
+								"key": "st-auth-mode",
+								"value": "cookie",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{apiUri}}/auth/session/refresh",
+							"host": [
+								"{{apiUri}}"
+							],
+							"path": [
+								"auth",
+								"session",
+								"refresh"
 							]
 						}
 					},
