@@ -1320,6 +1320,13 @@ CREATE TRIGGER set_nugget_updated_at BEFORE UPDATE ON opensociocracy_api.nugget 
 
 
 --
+-- Name: reaction set_reaction_reacted_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TRIGGER set_reaction_reacted_at BEFORE UPDATE ON opensociocracy_api.reaction FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_reacted_at();
+
+
+--
 -- Name: account_member fk_account_member_account_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
