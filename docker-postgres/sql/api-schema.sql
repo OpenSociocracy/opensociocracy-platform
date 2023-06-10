@@ -686,71 +686,15 @@ $$;
 
 
 --
--- Name: patch_logbook_entry(uuid, uuid, character varying, character varying); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+-- Name: patch_logbook_entry(uuid, uuid, text, character varying, character varying, jsonb, timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.patch_logbook_entry(member_uid_in uuid, logbook_entry_uid_in uuid, public_title_in character varying, internal_name_in character varying) RETURNS TABLE(uid uuid, "updatedAt" timestamp without time zone)
-    LANGUAGE plpgsql ROWS 1
-    AS $$
-
-BEGIN
-
-	UPDATE nugget SET
-	  public_title = COALESCE(NULLIF(public_title_in, ''), public_title),
-	  internal_name = COALESCE(NULLIF(internal_name_in, ''), internal_name)
-	WHERE nugget.uid = nugget_uid_in;
-	 
-	RETURN QUERY SELECT nugget_uid_in, LOCALTIMESTAMP;
-	
-	
-END; 
-$$;
-
-
---
--- Name: patch_logbook_entry_text(uuid, uuid, text, character varying, character varying); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
---
-
-CREATE FUNCTION opensociocracy_api.patch_logbook_entry_text(member_uid_in uuid, logbook_entry_uid_in uuid, note_in text, public_title_in character varying, internal_name_in character varying) RETURNS TABLE("logbookEntryUid" uuid, "updatedAt" timestamp without time zone)
+CREATE FUNCTION opensociocracy_api.patch_logbook_entry(member_uid_in uuid, logbook_entry_uid_in uuid, note_in text, public_title_in character varying, internal_name_in character varying, blocks_in jsonb, pub_at_in timestamp without time zone, un_pub_at_in timestamp without time zone) RETURNS TABLE("logbookEntryUid" uuid, "updatedAt" timestamp without time zone)
     LANGUAGE plpgsql ROWS 1
     AS $$
 
 DECLARE found_nugget_id bigint;
 DECLARE new_updated_at timestamp without time zone;
-
-
-BEGIN
-	-- UPDATE logbook_entry.updated_at and if provided, logbook_entry.note
-	-- RETURNING the updated_at and nugget_id INTO new_updated_at, and found_nugget_id
-	UPDATE logbook_entry SET
-	  note = COALESCE(NULLIF(note_in, ''), note)
-	WHERE uid = logbook_entry_uid_in
-	RETURNING updated_at, nugget_id INTO new_updated_at, found_nugget_id;
-
-	-- UPDATE the underlying nugget 
-	UPDATE nugget SET
-	  public_title = COALESCE(NULLIF(public_title_in, ''), public_title),
-	  internal_name = COALESCE(NULLIF(internal_name_in, ''), internal_name)
-	WHERE nugget.id = found_nugget_id;
-	 
-	RETURN QUERY SELECT logbook_entry_uid_in, new_updated_at;
-	
-	
-END; 
-$$;
-
-
---
--- Name: patch_logbook_entry_text2(uuid, uuid, text, character varying, character varying, jsonb); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
---
-
-CREATE FUNCTION opensociocracy_api.patch_logbook_entry_text2(member_uid_in uuid, logbook_entry_uid_in uuid, note_in text, public_title_in character varying, internal_name_in character varying, blocks_in jsonb) RETURNS TABLE("logbookEntryUid" uuid, "updatedAt" timestamp without time zone)
-    LANGUAGE plpgsql ROWS 1
-    AS $$
-
-DECLARE found_nugget_id bigint;
-DECLARE new_updated_at timestamp without time zone;
-
 
 BEGIN
 	-- UPDATE logbook_entry.updated_at and if provided, logbook_entry.note
@@ -764,32 +708,13 @@ BEGIN
 	UPDATE nugget SET
 	  public_title = COALESCE(NULLIF(public_title_in, ''), public_title),
 	  internal_name = COALESCE(NULLIF(internal_name_in, ''), internal_name),
-	  blocks = COALESCE(blocks_in, blocks)
+	  blocks = COALESCE(blocks_in, blocks),
+	  pub_at = COALESCE(pub_at_in, pub_at),
+	  un_pub_at = COALESCE(un_pub_at_in, un_pub_at)
+	  
 	WHERE nugget.id = found_nugget_id;
 	 
 	RETURN QUERY SELECT logbook_entry_uid_in, new_updated_at;
-	
-	
-END; 
-$$;
-
-
---
--- Name: patch_nugget(uuid, uuid, character varying, character varying); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
---
-
-CREATE FUNCTION opensociocracy_api.patch_nugget(member_uid_in uuid, nugget_uid_in uuid, public_title_in character varying, internal_name_in character varying) RETURNS TABLE(uid uuid, "updatedAt" timestamp without time zone)
-    LANGUAGE plpgsql ROWS 1
-    AS $$
-
-BEGIN
-
-	UPDATE nugget SET
-	  public_title = COALESCE(NULLIF(public_title_in, ''), public_title),
-	  internal_name = COALESCE(NULLIF(internal_name_in, ''), internal_name)
-	WHERE nugget.uid = nugget_uid_in;
-	 
-	RETURN QUERY SELECT nugget_uid_in, LOCALTIMESTAMP;
 	
 	
 END; 
@@ -1387,6 +1312,13 @@ ALTER TABLE ONLY opensociocracy_api.org
 
 ALTER TABLE ONLY opensociocracy_api.response
     ADD CONSTRAINT uq_response_uid UNIQUE (uid);
+
+
+--
+-- Name: logbook_entry set_logbook_entry_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TRIGGER set_logbook_entry_updated_at BEFORE UPDATE ON opensociocracy_api.logbook_entry FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_logbook_entry_updated_at();
 
 
 --

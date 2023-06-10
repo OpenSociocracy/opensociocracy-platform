@@ -23,36 +23,35 @@ const LogbookEntryService = (postgres) => {
     }
   }; 
 
-  const updateLogbookEntry = async (memberUid, logbookEntryUid, entryData) => {
+  const patchLogbookEntry = async (memberUid, logbookEntryUid, entryData) => {
     const client = await postgres.connect();
 
-    let query;
-    let values;
-
-    query = `SELECT "entryId", "logbookEntryUid" , "createdAt" , name , "logbookId", "logbookUid" 
-        FROM create_entry(
-          $1, $2, $3, $4
+    const query = `SELECT "logbookEntryUid" , "updatedAt" 
+        FROM patch_logbook_entry(
+          $1, $2, $3, $4, $5, $6, $7, $8
       )`;
 
-    values = [memberUid, logbookEntryUid, entryData.name, entryData.note];
+    const note = entryData.note ? entryData.note : null;
+    const publicTitle = entryData.publicTitle ? entryData.publicTitle : null;
+    const internalName = entryData.internalName ? entryData.internalName : null;
+    const blocks = entryData.blocks ? JSON.stringify(entryData.blocks) : null;
+    const pubAt = entryData.pubAt ? entryData.pubAt : null;
+    const unPubAt = entryData.unPubAt ? entryData.unPubAt : null;
+
+    const values = [memberUid, logbookEntryUid, note, publicTitle, internalName, blocks, pubAt, unPubAt];
 
     try {
       const result = await client.query(query, values);
-
-      const newData = result.rows[0];
-
+console.log('REEESULT', result)
       // Note: avoid doing expensive computation here, this will block releasing the client
-      return {
-        updatedAt: result.updatedAt,
-        Uid: result.logbookUid
-      };
+      return result.rows[0];
     } finally {
       // Release the client immediately after query resolves, or upon error
       client.release();
     }
   };
 
-  return { getLogbookEntry, updateLogbookEntry };
+  return { getLogbookEntry, patchLogbookEntry };
 };
 
 export default fp((server, options, next) => {

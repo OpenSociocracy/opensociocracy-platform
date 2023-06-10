@@ -62,7 +62,7 @@ async function entryEntryCreateRoutes(server, options) {
             description: "Success Response",
             type: "object",
             properties: {
-              entryEntryUid: { type: "string" },
+              logbookEntryUid: { type: "string" },
               updatedAt: { type: "string" },
             },
           },
@@ -74,7 +74,7 @@ async function entryEntryCreateRoutes(server, options) {
 
       const logbookEntryUid = request.params.logbookEntryUid;
 
-      const result = await server.entryService.updateEntry(memberUid, logbookEntryUid, request.body);
+      const result = await server.logbookEntryService.patchLogbookEntry(memberUid, logbookEntryUid, request.body);
 
       return result;
     }
