@@ -75,7 +75,7 @@ async function entryEntryCreateRoutes(server, options) {
       if(req.body.nugget)  {
 
         // Use the logbookUid to get the proper org_id
-        result = await server.nuggetService.createNuggetWithComment(memberUid, logbookEntryUid, metaData, req.body.nugget);
+        result = await server.nuggetService.createNuggetWithLogbookEntryComment(memberUid, logbookEntryUid, metaData, req.body.nugget);
 
       } else {
         result = await server.commentService.createComment(memberUid, logbookEntryUid, metaData);
