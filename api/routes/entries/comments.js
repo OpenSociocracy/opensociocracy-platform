@@ -13,7 +13,7 @@ async function entryEntryCreateRoutes(server, options) {
         response: {
           200: {
             description: "Success Response",
-            type: "object",
+            type: "array",
             properties: {
               logbookEntryUid: { type: "string" },
               createdAt: { type: "string" },
@@ -36,7 +36,7 @@ async function entryEntryCreateRoutes(server, options) {
       const logbookEntryUid = request.params.logbookEntryUid;
 
       const result = await server.commentService.getLogbookEntryComments(memberUid, logbookEntryUid);
-
+console.log('RESULT', result)
       return result;
     }
   );
