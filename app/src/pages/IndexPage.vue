@@ -8,6 +8,7 @@
         :label="$t('homepage.button')"
         color="primary"
         @click="triggerSignInDialog"
+        rounded
       ></q-btn>
     </div>
   </q-page>
