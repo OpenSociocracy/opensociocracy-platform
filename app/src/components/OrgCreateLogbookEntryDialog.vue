@@ -3,7 +3,7 @@
     <q-card class="q-dialog-plugin">
       <q-form @submit="onSubmit" @reset="onReset">
         <q-bar class="dialog-qbar">
-          {{  $t('orgs.create-dialog.dialog-title') }}
+          {{  $t('orgs.logbook-entry-dialog.title') }}
           <q-space></q-space>
 
           <q-btn dense flat icon="mdi-close" v-close-popup @click="auth.setTargetUrl(null)">
@@ -13,18 +13,24 @@
         <q-card-section>
           <div class="dialog-header row">
             <div class="col">
-              {{ $t('orgs.create-dialog.create-form-title') }}
+              {{ $t('orgs.logbook-entry-dialog.form-title') }}
             </div>
           </div>
           <div class="dialog-body">
-            {{ $t('orgs.create-dialog.create-form-body') }}
+            {{ $t('orgs.logbook-entry-dialog.form-body') }}
           </div>
         </q-card-section>
         <q-card-section>
           <q-input
-            :label="$t('orgs.create-dialog.org-name-hint')"
-            v-model="orgName"
+            :label="$t('orgs.logbook-entry-dialog.title-hint')"
+            v-model="publicTitle"
           ></q-input>
+          </q-card-section>
+            <q-card-section>
+          <q-select filled v-model="nuggetType"
+                      :options="nuggetTypes"
+                      :label="$t('orgs.logbook-entry-dialog.type-label')">
+          </q-select>
         </q-card-section>
         <!-- buttons example -->
         <q-card-actions align="center">
@@ -32,7 +38,7 @@
             icon="mdi-office-building-plus"
             color="primary"
             type="submit"
-            :label="$t('orgs.create-dialog.submit-button')"
+            :label="$t('orgs.logbook-entry-dialog.submit-button')"
             :disable="!submitEnabled"
           ></q-btn>
         </q-card-actions>
@@ -58,17 +64,36 @@ const props = defineProps({});
 
 const router = useRouter();
 
-const orgName = ref(null);
-const validOrgName = ref(false);
+const nuggetType = ref(null)
+
+const publicTitle = ref(null);
+const validTitle = ref(false);
 const submitted = ref(false);
 const submitEnabled = computed(() => {
-  return orgName.value && ! submitted.value && validOrgName.value ? true : false;
+  return publicTitle.value && ! submitted.value && validTitle.value && nuggetType.value ? true : false;
 });
 
+const nuggetTypes = [
+  {
+    id: 'proposal',
+    label: t('orgs.logbook-entry-dialog.type.proposal')
+  },
+  {
+    id: 'decision',
+    label: t('orgs.logbook-entry-dialog.type.decision')
+  },
+  {
+    id: 'agreement',
+    label: t('orgs.logbook-entry-dialog.type.agreement')
+  },
+  {
+    id: 'peer-review',
+    label: t('orgs.logbook-entry-dialog.type.peer-review')
+  }
+]
 
 const reset = () => {
-  orgName.value = null;
-  validEmail.value = false;
+  publicTitle.value = null;
   submitted.value = false;
 };
 
@@ -98,23 +123,21 @@ const onOKClick = () => {
 
 const onSubmit = async () => {
   submitted.value = true;
-  const orgData = await org.createOrg(orgName.value);
+  const entryData = await org.createOrg(publicTitle.value);
 
   console.log(orgData.uid)
   router.push('/org/'+ orgData.uid)
-
-
 };
 
 const onReset = () => {
-  orgName.value = null;
+  publicTitle.value = null;
 };
 
-watch(orgName, (newValue, oldValue) => {
-  if (org.validateOrgName(newValue)) {
-    validOrgName.value = true;
+watch(publicTitle, (newValue, oldValue) => {
+  if (org.validateTitle(newValue)) {
+    validTitle.value = true;
   } else {
-    validOrgName.value = false;
+    validTitle.value = false;
   }
 });
 
