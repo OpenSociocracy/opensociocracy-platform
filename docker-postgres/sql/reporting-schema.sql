@@ -50,8 +50,7 @@ CREATE VIEW reporting.v_user_member_accounts AS
     m.uid AS "memberUid",
     m.created_at AS "createdAt",
     a.uid AS "accountUid",
-    am.roles,
-    a.personal
+    am.roles
    FROM ((((supertokens.all_auth_recipe_users u
      JOIN supertokens.passwordless_users pu ON ((pu.user_id = u.user_id)))
      JOIN opensociocracy_api.member m ON ((m.uid = (u.user_id)::uuid)))
