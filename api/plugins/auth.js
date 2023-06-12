@@ -50,6 +50,7 @@ async function auth(server, options) {
           }),
         },
       }),
+      EmailPassword.init(), // initializes signin / sign up features
       Session.init(), // initializes session features
     ],
   });

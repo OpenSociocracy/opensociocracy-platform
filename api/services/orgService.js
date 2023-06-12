@@ -23,7 +23,7 @@ const OrgService = (postgres) => {
     }
   };
 
-  const createOrg = async (orgData, memberUid) => {
+  const createOrg = async (memberUid, accountUid, orgData) => {
     const client = await postgres.connect();
 
     let query;
@@ -34,7 +34,7 @@ const OrgService = (postgres) => {
           $1, $2, $3, $4
       )`;
 
-    values = [memberUid, orgData.accountUid, orgData.name, orgData.note];
+    values = [memberUid, accountUid, orgData.name, orgData.note];
 
     try {
       const result = await client.query(query, values);
