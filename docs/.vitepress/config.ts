@@ -7,12 +7,12 @@ export default defineConfig({
   head: [
     [
       'script',
-      { async: '', src: 'https://www.googletagmanager.com/gtag/js?id=G-G19NFP630F' }
+      { async: '', src: 'https://www.googletagmanager.com/gtag/js?id=G-375351769' }
     ],
     [
       'script',
       {},
-      "window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-G19NFP630F');"
+      "window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-375351769');"
     ]
   ],
   themeConfig: {

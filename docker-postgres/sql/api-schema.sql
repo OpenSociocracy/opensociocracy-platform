@@ -32,7 +32,9 @@ CREATE TYPE opensociocracy_api.account_roles AS ENUM (
     'member-admin',
     'billing-admin',
     'viewer',
-    'editor'
+    'editor',
+    'org-admin',
+    'admin'
 );
 
 
@@ -117,8 +119,8 @@ DECLARE new_account_created_at timestamp without time zone;
 
 BEGIN
     
-	INSERT INTO opensociocracy_api.account(name, personal)
-		 VALUES(name_in, false)
+	INSERT INTO opensociocracy_api.account(name)
+		 VALUES(name_in)
 		 RETURNING opensociocracy_api.account.id, opensociocracy_api.account.uid, opensociocracy_api.account.created_at INTO new_account_id, new_account_uid, new_account_created_at;
 		
 	INSERT INTO opensociocracy_api.account_member(account_id, member_id , roles)
@@ -452,6 +454,74 @@ $$;
 
 
 --
+-- Name: get_logbook_entry(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_logbook_entry(member_uid_in uuid, logbook_entry_uid_in uuid) RETURNS TABLE("logbookEntryUid" uuid, "createdAt" timestamp without time zone, "updatedAt" timestamp without time zone, note text, "pubAt" timestamp with time zone, "unPubAt" timestamp with time zone, "publicTitle" character varying, "internalName" character varying, blocks jsonb, "nuggetType" opensociocracy_api.nugget_types)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT 
+				  le.uid, 
+				  le.created_at, 
+				  le.updated_at, 
+				  le.note, 
+				  n.pub_at,
+				  n.un_pub_at,
+				  n.public_title,
+				  n.internal_name,
+				  n.blocks,
+				  n.nugget_type
+	FROM opensociocracy_api.logbook_entry le
+	LEFT JOIN nugget n ON n.id = le.nugget_id
+    INNER JOIN opensociocracy_api.logbook l ON l.id = le.logbook_id
+	INNER JOIN opensociocracy_api.org o ON o.id = l.org_id
+	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
+	INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in
+ 	AND le.uid = logbook_entry_uid_in );
+END
+$$;
+
+
+--
+-- Name: get_logbook_entry_comments(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_logbook_entry_comments(member_uid_in uuid, logbook_entry_uid_in uuid) RETURNS TABLE("commentUid" uuid, "createdAt" timestamp without time zone, "updatedAt" timestamp without time zone, note text, "pubAt" timestamp with time zone, "unPubAt" timestamp with time zone, "publicTitle" character varying, "internalName" character varying, blocks jsonb, "nuggetType" opensociocracy_api.nugget_types)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT 
+				  c.uid, 
+				  c.created_at, 
+				  c.updated_at, 
+				  c.note,
+	  		      cn.pub_at,
+				  cn.un_pub_at,
+				  cn.public_title,
+				  cn.internal_name,
+				  cn.blocks,
+				  cn.nugget_type
+	FROM logbook_entry le
+	LEFT JOIN nugget n ON n.id = le.nugget_id
+	JOIN comment c ON c.target_nugget_id = n.id
+    LEFT JOIN nugget cn ON cn.id = c.data_nugget_id
+    INNER JOIN logbook l ON l.id = le.logbook_id
+	INNER JOIN org o ON o.id = l.org_id
+	INNER JOIN account a ON a.id = o.account_id
+	INNER JOIN account_member am ON am.account_id = a.id
+	INNER JOIN member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in
+ 	AND le.uid = logbook_entry_uid_in );
+END
+$$;
+
+
+--
 -- Name: get_logbook_nugget(uuid, uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -514,12 +584,12 @@ $$;
 -- Name: get_member_accounts(uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.get_member_accounts(uid_in uuid) RETURNS TABLE("accountUid" uuid, "createdAt" timestamp without time zone, name character varying, personal boolean)
+CREATE FUNCTION opensociocracy_api.get_member_accounts(uid_in uuid) RETURNS TABLE("accountUid" uuid, "createdAt" timestamp without time zone, name character varying)
     LANGUAGE plpgsql
     AS $$
 BEGIN
 	
-	RETURN QUERY (SELECT a.uid, a.created_at, a.name, a.personal  
+	RETURN QUERY (SELECT a.uid, a.created_at, a.name
 	FROM opensociocracy_api.account_member am 
 	INNER JOIN opensociocracy_api.account a ON a.id = am.account_id
 	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
@@ -557,6 +627,24 @@ INNER JOIN opensociocracy_api.nugget n ON n.account_id = am.account_id
 WHERE m.uid = member_uid_in
 AND n.nugget_type = nugget_type_in;
 END;
+$$;
+
+
+--
+-- Name: get_member_orgs(uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_member_orgs(member_uid_in uuid) RETURNS TABLE("orgUid" uuid, "createdAt" timestamp without time zone, name character varying, note text)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	RETURN QUERY (SELECT o.uid, o.created_at, o.name, o.note
+	FROM opensociocracy_api.org o 
+	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
+	INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in );
+END; 
 $$;
 
 
@@ -627,28 +715,41 @@ BEGIN
 		
 	INSERT INTO opensociocracy_api.account_member(account_id, member_id, roles)
 		 VALUES(new_account_id, new_member_id, '{"owner"}');
-		 
 		 RETURN NEW;
 END;
 $$;
 
 
 --
--- Name: patch_nugget(uuid, uuid, character varying, character varying); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+-- Name: patch_logbook_entry(uuid, uuid, text, character varying, character varying, jsonb, timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.patch_nugget(member_uid_in uuid, nugget_uid_in uuid, public_title_in character varying, internal_name_in character varying) RETURNS TABLE(uid uuid, "updatedAt" timestamp without time zone)
+CREATE FUNCTION opensociocracy_api.patch_logbook_entry(member_uid_in uuid, logbook_entry_uid_in uuid, note_in text, public_title_in character varying, internal_name_in character varying, blocks_in jsonb, pub_at_in timestamp without time zone, un_pub_at_in timestamp without time zone) RETURNS TABLE("logbookEntryUid" uuid, "updatedAt" timestamp without time zone)
     LANGUAGE plpgsql ROWS 1
     AS $$
 
-BEGIN
+DECLARE found_nugget_id bigint;
+DECLARE new_updated_at timestamp without time zone;
 
+BEGIN
+	-- UPDATE logbook_entry.updated_at and if provided, logbook_entry.note
+	-- RETURNING the updated_at and nugget_id INTO new_updated_at, and found_nugget_id
+	UPDATE logbook_entry SET
+	  note = COALESCE(NULLIF(note_in, ''), note)
+	WHERE uid = logbook_entry_uid_in
+	RETURNING updated_at, nugget_id INTO new_updated_at, found_nugget_id;
+
+	-- UPDATE the underlying nugget 
 	UPDATE nugget SET
 	  public_title = COALESCE(NULLIF(public_title_in, ''), public_title),
-	  internal_name = COALESCE(NULLIF(internal_name_in, ''), internal_name)
-	WHERE nugget.uid = nugget_uid_in;
+	  internal_name = COALESCE(NULLIF(internal_name_in, ''), internal_name),
+	  blocks = COALESCE(blocks_in, blocks),
+	  pub_at = COALESCE(pub_at_in, pub_at),
+	  un_pub_at = COALESCE(un_pub_at_in, un_pub_at)
+	  
+	WHERE nugget.id = found_nugget_id;
 	 
-	RETURN QUERY SELECT nugget_uid_in, LOCALTIMESTAMP;
+	RETURN QUERY SELECT logbook_entry_uid_in, new_updated_at;
 	
 	
 END; 
@@ -656,10 +757,24 @@ $$;
 
 
 --
--- Name: set_nugget_updated_at(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+-- Name: set_reacted_at(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.set_nugget_updated_at() RETURNS trigger
+CREATE FUNCTION opensociocracy_api.set_reacted_at() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    NEW.reacted_at = now();
+    RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: set_updated_at(); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.set_updated_at() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -704,8 +819,7 @@ CREATE TABLE opensociocracy_api.account (
     id bigint NOT NULL,
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    name character varying(150),
-    personal boolean DEFAULT true
+    name character varying(150)
 );
 
 
@@ -748,9 +862,11 @@ CREATE TABLE opensociocracy_api.account_member (
 CREATE TABLE opensociocracy_api.comment (
     id bigint NOT NULL,
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
-    "created_at " timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    org_id bigint NOT NULL,
-    nugget_id bigint NOT NULL
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    target_nugget_id bigint NOT NULL,
+    updated_at timestamp without time zone,
+    note text,
+    data_nugget_id bigint
 );
 
 
@@ -777,7 +893,8 @@ CREATE TABLE opensociocracy_api.logbook_entry (
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     logbook_id bigint,
     note text,
-    nugget_id bigint
+    nugget_id bigint,
+    updated_at timestamp without time zone
 );
 
 
@@ -980,8 +1097,8 @@ CREATE TABLE opensociocracy_api.org_member (
 
 CREATE TABLE opensociocracy_api.reaction (
     nugget_id bigint NOT NULL,
-    org_id bigint NOT NULL,
-    member_id bigint NOT NULL
+    member_id bigint NOT NULL,
+    reacted_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -1139,14 +1256,6 @@ ALTER TABLE ONLY opensociocracy_api.nugget
 
 
 --
--- Name: reaction nugget_reaction_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.reaction
-    ADD CONSTRAINT nugget_reaction_pkey PRIMARY KEY (nugget_id, org_id, member_id);
-
-
---
 -- Name: org_member org_member_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
@@ -1235,10 +1344,31 @@ ALTER TABLE ONLY opensociocracy_api.response
 
 
 --
+-- Name: comment set_comment_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TRIGGER set_comment_updated_at BEFORE UPDATE ON opensociocracy_api.comment FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_updated_at();
+
+
+--
+-- Name: logbook_entry set_logbook_entry_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TRIGGER set_logbook_entry_updated_at BEFORE UPDATE ON opensociocracy_api.logbook_entry FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_updated_at();
+
+
+--
 -- Name: nugget set_nugget_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE TRIGGER set_nugget_updated_at BEFORE UPDATE ON opensociocracy_api.nugget FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_nugget_updated_at();
+CREATE TRIGGER set_nugget_updated_at BEFORE UPDATE ON opensociocracy_api.nugget FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_updated_at();
+
+
+--
+-- Name: reaction set_reaction_reacted_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TRIGGER set_reaction_reacted_at BEFORE UPDATE ON opensociocracy_api.reaction FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_reacted_at();
 
 
 --
@@ -1262,15 +1392,7 @@ ALTER TABLE ONLY opensociocracy_api.account_member
 --
 
 ALTER TABLE ONLY opensociocracy_api.comment
-    ADD CONSTRAINT fk_comment_nugget_id FOREIGN KEY (nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
-
-
---
--- Name: comment fk_comment_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.comment
-    ADD CONSTRAINT fk_comment_org_id FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id) NOT VALID;
+    ADD CONSTRAINT fk_comment_nugget_id FOREIGN KEY (target_nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
 
 
 --
@@ -1343,14 +1465,6 @@ ALTER TABLE ONLY opensociocracy_api.reaction
 
 ALTER TABLE ONLY opensociocracy_api.reaction
     ADD CONSTRAINT fk_reaction_nugget_id FOREIGN KEY (nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
-
-
---
--- Name: reaction fk_reaction_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.reaction
-    ADD CONSTRAINT fk_reaction_org_id FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id) NOT VALID;
 
 
 --
@@ -1502,6 +1616,13 @@ GRANT ALL ON SEQUENCE opensociocracy_api.org_account_id_seq TO opensociocracy_su
 --
 
 GRANT ALL ON SEQUENCE opensociocracy_api.org_id_seq TO opensociocracy_supertokens;
+
+
+--
+-- Name: TABLE org_member; Type: ACL; Schema: opensociocracy_api; Owner: -
+--
+
+GRANT ALL ON TABLE opensociocracy_api.org_member TO opensociocracy_supertokens;
 
 
 --

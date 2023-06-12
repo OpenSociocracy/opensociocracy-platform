@@ -1,46 +1,45 @@
 import fastifyPlugin from "fastify-plugin";
 import { verifySession } from "supertokens-node/recipe/session/framework/fastify/index.js";
 
-async function logbookEntriesRoutes(server, options) {
+async function entryEntryCreateRoutes(server, options) {
   server.get(
-    "/logbooks/:logbookUid/entries",
+    "/entries/:logbookEntryUid/comments",
     {
       preHandler: verifySession(),
       schema: {
-        description: "Get entries for a logbook",
-        tags: ["logbooks"],
-        summary: "Get a logbook's entries.",
+        description: "Get a logbook entry's comments",
+        tags: ["entries"],
+        summary: "Get a logbook entry's top-level comments.",
         response: {
           200: {
             description: "Success Response",
             type: "object",
             properties: {
-              logbookEntries: { type: "array" },
+              comments: { type: "array" },
             },
           },
         },
       },
     },
-    async (req, reply) => {
-      const memberUid = req.session.getUserId();
+    async (request, reply) => {
+      const memberUid = request.session.getUserId();
 
-      const logbookUid = req.params.logbookUid;
+      const logbookEntryUid = request.params.logbookEntryUid;
 
-      const result = await server.logbookService.getLogbookEntries(memberUid, logbookUid);
+      const result = await server.commentService.getLogbookEntryComments(memberUid, logbookEntryUid);
 
-      console.log('ROUTER RESULT', result)
-
-      return result;
+      return {comments: result };
     }
   );
+
   server.post(
-    "/logbooks/:logbookUid/entries",
+    "/entries/:logbookEntryUid/comments",
     {
       preHandler: verifySession(),
       schema: {
-        description: "Create a new logbook entry",
+        description: "Create a new logbook entry comment",
         tags: ["logbooks"],
-        summary: "Add a new entry to the logbook",
+        summary: "Comment on a logbook entry",
         body: {
           type: "object",
           properties: {
@@ -55,7 +54,7 @@ async function logbookEntriesRoutes(server, options) {
             description: "Success Response",
             type: "object",
             properties: {
-              logbookEntryUid: { type: "string" },
+              commentUid: { type: "string" },
               createdAt: { type: "string" }
             },
           },
@@ -65,7 +64,7 @@ async function logbookEntriesRoutes(server, options) {
     async (req, reply) => {
       const memberUid = req.session.getUserId();
 
-      const logbookUid = req.params.logbookUid;
+      const logbookEntryUid = req.params.logbookEntryUid;
 
       let result;
 
@@ -76,16 +75,16 @@ async function logbookEntriesRoutes(server, options) {
       if(req.body.nugget)  {
 
         // Use the logbookUid to get the proper org_id
-        result = await server.nuggetService.createNuggetWithLogbookEntry(memberUid, logbookUid, metaData, req.body.nugget);
+        result = await server.nuggetService.createNuggetWithLogbookEntryComment(memberUid, logbookEntryUid, metaData, req.body.nugget);
 
       } else {
-        result = await server.logbookService.createLogbookEntry(memberUid, logbookUid, metaData);
+        result = await server.commentService.createComment(memberUid, logbookEntryUid, metaData);
       }
 
       return result;
     }
   );
-
+ 
 }
 
-export default fastifyPlugin(logbookEntriesRoutes);
+export default fastifyPlugin(entryEntryCreateRoutes);

@@ -61,10 +61,10 @@ async function accountsRoutes(server, options) {
         },
       },
     },
-    async (req, reply) => {
-      let userId = req.session.getUserId();
+    async (request, reply) => {
+      let userId = request.session.getUserId();
 
-      const result = await server.accountService.createAccount(req.body, userId);
+      const result = await server.accountService.createAccount(request.body, userId);
 
       return result;
     }
