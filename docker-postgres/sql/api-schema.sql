@@ -807,6 +807,30 @@ END;
 $$;
 
 
+--
+-- Name: valid_logbook_entry_account_org(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.valid_logbook_entry_account_org(member_uid_in uuid, logbook_entry_uid_in uuid) RETURNS TABLE(account_id bigint, org_id bigint, logbook_id bigint)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT a.id AS account_id, o.id AS org_id, l.id AS logbook_id
+		FROM opensociocracy_api.account a
+		INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
+		INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	    INNER JOIN opensociocracy_api.org o ON o.account_id = a.id
+	    INNER JOIN opensociocracy_api.org_member om ON om.org_id = o.id AND om.member_id = m.id
+	    INNER JOIN opensociocracy_api.logbook l ON l.org_id = o.id
+	    INNER JOIN opensociocracy_api.logbook_entry le ON le.logbook_id = l.id
+		WHERE m.uid =  member_uid_in
+		AND le.uid = logbook_entry_uid_in
+		AND (om.role = ANY('{"owner","leader"}') OR  'owner' = ANY(am.roles)));	
+END; 
+$$;
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
