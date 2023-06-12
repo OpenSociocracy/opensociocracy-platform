@@ -86,6 +86,33 @@ CREATE TYPE opensociocracy_api.org_roles AS ENUM (
 
 
 --
+-- Name: reaction_types; Type: TYPE; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TYPE opensociocracy_api.reaction_types AS ENUM (
+    'consent',
+    'object',
+    'abstain',
+    'agree',
+    'disagree',
+    'unsure',
+    'like',
+    'dislike',
+    'neutral',
+    'promote',
+    'bury',
+    'block',
+    'sympathy',
+    'empathy',
+    'concern',
+    'frustration',
+    'anger',
+    'confusion',
+    'boredom'
+);
+
+
+--
 -- Name: account_by_role(uuid, uuid, opensociocracy_api.account_roles); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -1137,7 +1164,8 @@ CREATE TABLE opensociocracy_api.member (
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     full_name character varying(64),
     platform_username character varying(32),
-    public_profile boolean DEFAULT false NOT NULL
+    public_profile boolean DEFAULT false NOT NULL,
+    updated_at timestamp without time zone
 );
 
 
@@ -1228,7 +1256,8 @@ CREATE TABLE opensociocracy_api.org (
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     account_id bigint NOT NULL,
     name character varying(64),
-    note text
+    note text,
+    updated_at timestamp without time zone
 );
 
 
@@ -1278,7 +1307,8 @@ CREATE TABLE opensociocracy_api.org_member (
     org_id bigint NOT NULL,
     member_id bigint NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    role opensociocracy_api.org_roles DEFAULT 'participant'::opensociocracy_api.org_roles NOT NULL
+    role opensociocracy_api.org_roles DEFAULT 'participant'::opensociocracy_api.org_roles NOT NULL,
+    updated_at timestamp without time zone
 );
 
 
@@ -1289,22 +1319,24 @@ CREATE TABLE opensociocracy_api.org_member (
 CREATE TABLE opensociocracy_api.reaction (
     nugget_id bigint NOT NULL,
     member_id bigint NOT NULL,
-    reacted_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    reacted_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    reaction opensociocracy_api.reaction_types[] DEFAULT '{like}'::opensociocracy_api.reaction_types[] NOT NULL
 );
 
 
 --
--- Name: response; Type: TABLE; Schema: opensociocracy_api; Owner: -
+-- Name: reply; Type: TABLE; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE TABLE opensociocracy_api.response (
+CREATE TABLE opensociocracy_api.reply (
     id bigint NOT NULL,
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     comment_id bigint,
-    response_id bigint,
+    reply_id bigint,
     org_id bigint NOT NULL,
-    nugget_id bigint NOT NULL
+    nugget_id bigint NOT NULL,
+    note text
 );
 
 
@@ -1324,7 +1356,7 @@ CREATE SEQUENCE opensociocracy_api.response_id_seq
 -- Name: response_id_seq; Type: SEQUENCE OWNED BY; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER SEQUENCE opensociocracy_api.response_id_seq OWNED BY opensociocracy_api.response.id;
+ALTER SEQUENCE opensociocracy_api.response_id_seq OWNED BY opensociocracy_api.reply.id;
 
 
 --
@@ -1384,10 +1416,10 @@ ALTER TABLE ONLY opensociocracy_api.org ALTER COLUMN account_id SET DEFAULT next
 
 
 --
--- Name: response id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
+-- Name: reply id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.response ALTER COLUMN id SET DEFAULT nextval('opensociocracy_api.response_id_seq'::regclass);
+ALTER TABLE ONLY opensociocracy_api.reply ALTER COLUMN id SET DEFAULT nextval('opensociocracy_api.response_id_seq'::regclass);
 
 
 --
@@ -1463,10 +1495,18 @@ ALTER TABLE ONLY opensociocracy_api.org
 
 
 --
--- Name: response response_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: reaction reaction_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.response
+ALTER TABLE ONLY opensociocracy_api.reaction
+    ADD CONSTRAINT reaction_pkey PRIMARY KEY (nugget_id, member_id);
+
+
+--
+-- Name: reply response_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.reply
     ADD CONSTRAINT response_pkey PRIMARY KEY (id);
 
 
@@ -1527,10 +1567,10 @@ ALTER TABLE ONLY opensociocracy_api.org
 
 
 --
--- Name: response uq_response_uid; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: reply uq_response_uid; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.response
+ALTER TABLE ONLY opensociocracy_api.reply
     ADD CONSTRAINT uq_response_uid UNIQUE (uid);
 
 
@@ -1549,10 +1589,31 @@ CREATE TRIGGER set_logbook_entry_updated_at BEFORE UPDATE ON opensociocracy_api.
 
 
 --
+-- Name: member set_member_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TRIGGER set_member_updated_at BEFORE UPDATE ON opensociocracy_api.member FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_updated_at();
+
+
+--
 -- Name: nugget set_nugget_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
 --
 
 CREATE TRIGGER set_nugget_updated_at BEFORE UPDATE ON opensociocracy_api.nugget FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_updated_at();
+
+
+--
+-- Name: org_member set_org_member_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TRIGGER set_org_member_updated_at BEFORE UPDATE ON opensociocracy_api.org_member FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_updated_at();
+
+
+--
+-- Name: org set_org_updated_at; Type: TRIGGER; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TRIGGER set_org_updated_at BEFORE UPDATE ON opensociocracy_api.org FOR EACH ROW EXECUTE FUNCTION opensociocracy_api.set_updated_at();
 
 
 --
@@ -1667,35 +1728,35 @@ ALTER TABLE ONLY opensociocracy_api.reaction
 
 
 --
--- Name: response fk_response_comment_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: reply fk_reply_comment_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.response
-    ADD CONSTRAINT fk_response_comment_id FOREIGN KEY (comment_id) REFERENCES opensociocracy_api.comment(id) NOT VALID;
-
-
---
--- Name: response fk_response_nugget_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
---
-
-ALTER TABLE ONLY opensociocracy_api.response
-    ADD CONSTRAINT fk_response_nugget_id FOREIGN KEY (nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
+ALTER TABLE ONLY opensociocracy_api.reply
+    ADD CONSTRAINT fk_reply_comment_id FOREIGN KEY (comment_id) REFERENCES opensociocracy_api.comment(id) NOT VALID;
 
 
 --
--- Name: response fk_response_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: reply fk_reply_nugget_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.response
-    ADD CONSTRAINT fk_response_org_id FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id) NOT VALID;
+ALTER TABLE ONLY opensociocracy_api.reply
+    ADD CONSTRAINT fk_reply_nugget_id FOREIGN KEY (nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
 
 
 --
--- Name: response fk_response_response_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: reply fk_reply_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
-ALTER TABLE ONLY opensociocracy_api.response
-    ADD CONSTRAINT fk_response_response_id FOREIGN KEY (response_id) REFERENCES opensociocracy_api.response(id) NOT VALID;
+ALTER TABLE ONLY opensociocracy_api.reply
+    ADD CONSTRAINT fk_reply_org_id FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id) NOT VALID;
+
+
+--
+-- Name: reply fk_reply_reply_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.reply
+    ADD CONSTRAINT fk_reply_reply_id FOREIGN KEY (reply_id) REFERENCES opensociocracy_api.reply(id) NOT VALID;
 
 
 --
@@ -1832,10 +1893,10 @@ GRANT ALL ON TABLE opensociocracy_api.reaction TO opensociocracy_supertokens;
 
 
 --
--- Name: TABLE response; Type: ACL; Schema: opensociocracy_api; Owner: -
+-- Name: TABLE reply; Type: ACL; Schema: opensociocracy_api; Owner: -
 --
 
-GRANT ALL ON TABLE opensociocracy_api.response TO opensociocracy_supertokens;
+GRANT ALL ON TABLE opensociocracy_api.reply TO opensociocracy_supertokens;
 
 
 --
