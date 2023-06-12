@@ -528,6 +528,38 @@ $$;
 
 
 --
+-- Name: get_comment(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_comment(member_uid_in uuid, comment_uid_in uuid) RETURNS TABLE("commentUid" uuid, "createdAt" timestamp without time zone, "updatedAt" timestamp without time zone, note text, "pubAt" timestamp with time zone, "unPubAt" timestamp with time zone, "publicTitle" character varying, "internalName" character varying, blocks jsonb, "nuggetType" opensociocracy_api.nugget_types)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT 
+				  c.uid, 
+				  c.created_at, 
+				  c.updated_at, 
+				  c.note, 
+				  n.pub_at,
+				  n.un_pub_at,
+				  n.public_title,
+				  n.internal_name,
+				  n.blocks,
+				  n.nugget_type
+	FROM comment c
+	LEFT JOIN nugget n ON n.id =c.target_nugget_id
+	INNER JOIN org o ON o.id = n.org_id
+	INNER JOIN account a ON a.id = o.account_id
+	INNER JOIN account_member am ON am.account_id = a.id
+	INNER JOIN member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in
+ 	AND c.uid = comment_uid_in );
+END
+$$;
+
+
+--
 -- Name: get_logbook_entries(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
