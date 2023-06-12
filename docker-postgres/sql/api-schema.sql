@@ -852,6 +852,42 @@ $$;
 
 
 --
+-- Name: patch_comment(uuid, uuid, text, character varying, character varying, jsonb, timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.patch_comment(member_uid_in uuid, comment_uid_in uuid, note_in text, public_title_in character varying, internal_name_in character varying, blocks_in jsonb, pub_at_in timestamp without time zone, un_pub_at_in timestamp without time zone) RETURNS TABLE("commentUid" uuid, "updatedAt" timestamp without time zone)
+    LANGUAGE plpgsql ROWS 1
+    AS $$
+
+DECLARE found_nugget_id bigint;
+DECLARE new_updated_at timestamp without time zone;
+
+BEGIN
+	-- UPDATE logbook_entry.updated_at and if provided, logbook_entry.note
+	-- RETURNING the updated_at and nugget_id INTO new_updated_at, and found_nugget_id
+	UPDATE comment SET
+	  note = COALESCE(NULLIF(note_in, ''), note)
+	WHERE uid = comment_uid_in
+	RETURNING updated_at, data_nugget_id INTO new_updated_at, found_nugget_id;
+
+	-- UPDATE the underlying nugget 
+	UPDATE nugget SET
+	  public_title = COALESCE(NULLIF(public_title_in, ''), public_title),
+	  internal_name = COALESCE(NULLIF(internal_name_in, ''), internal_name),
+	  blocks = COALESCE(blocks_in, blocks),
+	  pub_at = COALESCE(pub_at_in, pub_at),
+	  un_pub_at = COALESCE(un_pub_at_in, un_pub_at)
+	  
+	WHERE nugget.id = found_nugget_id;
+	 
+	RETURN QUERY SELECT comment_uid_in, new_updated_at;
+	
+	
+END; 
+$$;
+
+
+--
 -- Name: patch_logbook_entry(uuid, uuid, text, character varying, character varying, jsonb, timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 

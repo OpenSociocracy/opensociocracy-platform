@@ -1155,7 +1155,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"note\": \"This comment is real, and I have a nugget of info\",\n    \"nugget\": {\n        \"nuggetType\": \"proposal\",\n        \"pubAt\": \"2023-05-25\",\n        \"internalName\": \"This comment is major\",\n        \"publicTitle\": \"Stop paving parking lots\",\n        \"blocks\": [\n            {\n                \"blockType\": \"standardProposal\",\n                \"data\": {\n\n                }\n            },\n            {\n                \"blockType\": \"slideDeck\",\n                \"data\": {\n                    \n                }\n            },\n            {\n                \"blockType\": \"spreadsheet\",\n                \"data\": {\n                    \n                }\n            }\n        ]\n    }\n}",
+									"raw": "{\n    \"note\": \"This comment is real, but has no nugget\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1177,7 +1177,7 @@
 							"response": []
 						},
 						{
-							"name": "Get Logbook Entry Copy",
+							"name": "Get Comment",
 							"event": [
 								{
 									"listen": "test",
@@ -1189,7 +1189,7 @@
 											"",
 											"pm.test(\"Data has the correct shape\", function () {",
 											"    var jsonData = pm.response.json();",
-											"    pm.expect(jsonData.logbookEntryUid).to.exist;",
+											"    pm.expect(jsonData.commentUid).to.exist;",
 											"     pm.expect(jsonData.createdAt).to.exist;",
 											"      pm.expect(jsonData.updatedAt).to.exist;",
 											"       pm.expect(jsonData.pubAt).to.exist;",
@@ -1229,20 +1229,20 @@
 									}
 								],
 								"url": {
-									"raw": "{{apiUri}}/entries/{{logbookEntryUid}}",
+									"raw": "{{apiUri}}/comments/{{commentUid}}",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"entries",
-										"{{logbookEntryUid}}"
+										"comments",
+										"{{commentUid}}"
 									]
 								}
 							},
 							"response": []
 						},
 						{
-							"name": "Update Comment for an entry",
+							"name": "Update a Comment",
 							"event": [
 								{
 									"listen": "test",
@@ -1267,7 +1267,7 @@
 								}
 							],
 							"request": {
-								"method": "PUT",
+								"method": "PATCH",
 								"header": [
 									{
 										"key": "rid",
@@ -1282,7 +1282,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"comment\": \"Cool idea, thank you. Do we know what will it cost?\"\n}",
+									"raw": "{\n    \"note\": \"This note was updated by 5patching\",\n    \"pubAt\": \"2024-09-05\",\n    \"unPubAt\": \"2024-09-05\",\n    \"internalName\": \"NEW5 Proposal to recover the parking lot.\",\n    \"publicTitle\": \"NEW5 Prettier Parking\",\n    \"blocks\": [\n        {\n            \"blockType\": \"standardProposal\",\n            \"data\": {\n                \"myData\": \"u5pdate all\"\n            }\n        },\n        {\n            \"blockType\": \"slideDeck\",\n            \"data\": {\n                \"myData\": \"5all updated\"\n            }\n        },\n        {\n            \"blockType\": \"spreadsheet\",\n            \"data\": {\n                \"myData\": \"5updated all\"\n            }\n        }\n    ]\n\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1290,13 +1290,13 @@
 									}
 								},
 								"url": {
-									"raw": "{{apiUri}}/nugget/{{nuggetUid}}",
+									"raw": "{{apiUri}}/comments/{{commentUid}}",
 									"host": [
 										"{{apiUri}}"
 									],
 									"path": [
-										"nugget",
-										"{{nuggetUid}}"
+										"comments",
+										"{{commentUid}}"
 									]
 								}
 							},

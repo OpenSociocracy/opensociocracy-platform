@@ -51,7 +51,7 @@ const LogbookEntryService = (postgres) => {
     }
   };
 
-  const createLogbookEntryComment = async (memberUid, logbookEntryUid, note) => {
+  const createLogbookEntryComment = async (memberUid, logbookEntryUid, entryData) => {
     const client = await postgres.connect();
 
     const query = `SELECT "commentUid" , "createdAt" 
@@ -59,7 +59,7 @@ const LogbookEntryService = (postgres) => {
           $1, $2, $3
       )`;
 
-    const values = [memberUid, logbookEntryUid, note];
+    const values = [memberUid, logbookEntryUid, entryData.note];
 
     try {
       const result = await client.query(query, values);

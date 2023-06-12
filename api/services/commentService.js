@@ -47,7 +47,7 @@ const CommentService = (postgres) => {
     const client = await postgres.connect();
 
     const query = `SELECT "commentUid" , "updatedAt" 
-        FROM patch_logbook_entry(
+        FROM patch_comment(
           $1, $2, $3, $4, $5, $6, $7, $8
       )`;
 
