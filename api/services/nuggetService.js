@@ -101,7 +101,7 @@ const NuggetService = (postgres) => {
     }
   };
 
-  const createNuggetWithLogbookEntryComment = async (memberUid, logbookUid, metaData, nuggetData) => {
+  const createNuggetWithLogbookEntryComment = async (memberUid, logbookEntryUid, metaData, nuggetData) => {
     const client = await postgres.connect();
 
     let query;
@@ -116,17 +116,19 @@ const NuggetService = (postgres) => {
   const note = metaData.note ? metaData.note : null;
 
     query = `SELECT * 
-        FROM create_logbook_entry_nugget(
+        FROM create_logbook_entry_comment_nugget(
           $1, $2, $3, $4, $5, $6, $7, $8, $9
       )`;
 
-    values = [memberUid, logbookUid, pubAt, unPubAt, publicTitle, internalName, blocks, nuggetType, note];
+    values = [memberUid, logbookEntryUid, pubAt, unPubAt, publicTitle, internalName, blocks, nuggetType, note];
     
 
     try {
       const result = await client.query(query, values);
 
       const newData = result.rows[0];
+
+      console.log('NEWDATA#########',newData)
 
       // Note: avoid doing expensive computation here, this will block releasing the client
       return {

@@ -74,11 +74,13 @@ async function entryEntryCreateRoutes(server, options) {
       // If there is nugget data, we need to create the nugget first.
       if(req.body.nugget)  {
 
+        // console.log(memberUid, logbookEntryUid, metaData, req.body.nugget)
+
         // Use the logbookUid to get the proper org_id
         result = await server.nuggetService.createNuggetWithLogbookEntryComment(memberUid, logbookEntryUid, metaData, req.body.nugget);
 
       } else {
-        result = await server.commentService.createComment(memberUid, logbookEntryUid, metaData);
+        result = await server.commentService.createLogbookEntryComment(memberUid, logbookEntryUid, metaData);
       }
 
       return result;
