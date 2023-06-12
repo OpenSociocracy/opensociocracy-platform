@@ -72,13 +72,12 @@ const LogbookService = (postgres) => {
       const result = await client.query(query, values);
 
       const newData = result.rows[0];
-
+      
       // Note: avoid doing expensive computation here, this will block releasing the client
       return {
-        logbookUid: newData.logbookUid,
+        logbookEntryUid: newData.logbookEntryUid,
         createdAt: newData.createdAt,
-        name: logbookEntryData.name,
-        logbookUid: newData.logbookUid
+        logbookId: newData.logbookId
       };
     } finally {
       // Release the client immediately after query resolves, or upon error

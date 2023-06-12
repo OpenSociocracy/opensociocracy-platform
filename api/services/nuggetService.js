@@ -132,10 +132,10 @@ const NuggetService = (postgres) => {
 
       // Note: avoid doing expensive computation here, this will block releasing the client
       return {
-        nuggetId: newData.nuggetId,
-        nuggetUid: newData.nuggetUid,
-        logbookEntryId: newData.logbookEntryId,
-        logbookEntryUid: newData.logbookEntryUid,
+        commentNuggetId: newData.commentNuggetId,
+        commentNuggetUid: newData.commentNuggetUid,
+        commentUid: newData.commentUid,
+        commentNuggetUid: newData.commentNuggetUid,
         createdAt: newData.createdAt
       };
     } finally {

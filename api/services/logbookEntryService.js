@@ -42,7 +42,7 @@ const LogbookEntryService = (postgres) => {
 
     try {
       const result = await client.query(query, values);
-console.log('REEESULT', result)
+
       // Note: avoid doing expensive computation here, this will block releasing the client
       return result.rows[0];
     } finally {
@@ -51,7 +51,28 @@ console.log('REEESULT', result)
     }
   };
 
-  return { getLogbookEntry, patchLogbookEntry };
+  const createLogbookEntryComment = async (memberUid, logbookEntryUid, note) => {
+    const client = await postgres.connect();
+
+    const query = `SELECT "commentUid" , "createdAt" 
+        FROM create_logbook_entry_comment(
+          $1, $2, $3
+      )`;
+
+    const values = [memberUid, logbookEntryUid, note];
+
+    try {
+      const result = await client.query(query, values);
+
+      // Note: avoid doing expensive computation here, this will block releasing the client
+      return result.rows[0];
+    } finally {
+      // Release the client immediately after query resolves, or upon error
+      client.release();
+    }
+  }
+
+  return { getLogbookEntry, patchLogbookEntry, createLogbookEntryComment };
 };
 
 export default fp((server, options, next) => {

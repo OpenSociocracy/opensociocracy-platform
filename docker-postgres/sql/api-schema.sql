@@ -196,6 +196,105 @@ $$;
 
 
 --
+-- Name: create_logbook_entry_comment(uuid, uuid, text); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.create_logbook_entry_comment(member_uid_in uuid, logbook_entry_uid_in uuid, note_in text) RETURNS TABLE("commentId" bigint, "commentUid" uuid, "createdAt" timestamp without time zone)
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE new_comment_id BIGINT;
+DECLARE new_comment_uid uuid;
+DECLARE new_comment_created_at timestamp without time zone;
+DECLARE valid_org_id bigint;
+DECLARE valid_account_id bigint;
+DECLARE valid_logbook_id bigint;
+DECLARE valid_logbook_entry_id bigint;
+DECLARE valid_logbook_entry_nugget_id bigint;
+
+BEGIN
+	-- Get account and org id, ensuring they are connected to the member
+	SELECT account_id, org_id, logbook_id, logbook_entry_id, logbook_entry_nugget_id  FROM valid_logbook_entry_account_org(member_uid_in, logbook_entry_uid_in) INTO valid_account_id, valid_org_id, valid_logbook_id, valid_logbook_entry_id, valid_logbook_entry_nugget_id;
+  
+  -- Create a new comment, referencing the nugget as data_nugget
+	INSERT INTO opensociocracy_api.comment(target_nugget_id, note)
+		 VALUES(
+			valid_logbook_entry_nugget_id,
+		     note_in)
+		 RETURNING opensociocracy_api.comment.id, opensociocracy_api.comment.uid, opensociocracy_api.comment.created_at INTO new_comment_id, new_comment_uid, new_comment_created_at;
+
+	-- Return ID and UID of nugget and logbookRecord
+	RETURN QUERY SELECT new_comment_id, new_comment_uid, new_comment_created_at;
+	
+	
+END; 
+$$;
+
+
+--
+-- Name: create_logbook_entry_comment_nugget(uuid, uuid, timestamp with time zone, timestamp with time zone, character varying, character varying, jsonb, opensociocracy_api.nugget_types, text); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.create_logbook_entry_comment_nugget(member_uid_in uuid, logbook_entry_uid_in uuid, pub_at_in timestamp with time zone, un_pub_at_in timestamp with time zone, public_title_in character varying, internal_name_in character varying, blocks_in jsonb, nugget_type_in opensociocracy_api.nugget_types, note_in text) RETURNS TABLE("commentNuggetId" bigint, "commentNuggetUid" uuid, "commentId" bigint, "commentUid" uuid, "createdAt" timestamp without time zone)
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE new_nugget_id BIGINT;
+DECLARE new_nugget_uid uuid;
+DECLARE new_comment_id BIGINT;
+DECLARE new_comment_uid uuid;
+DECLARE new_comment_created_at timestamp without time zone;
+DECLARE valid_org_id bigint;
+DECLARE valid_account_id bigint;
+DECLARE valid_logbook_id bigint;
+DECLARE valid_logbook_entry_id bigint;
+DECLARE valid_logbook_entry_nugget_id bigint;
+
+BEGIN
+	-- Get account and org id, ensuring they are connected to the member
+	SELECT account_id, org_id, logbook_id, logbook_entry_id, logbook_entry_nugget_id FROM valid_logbook_entry_account_org(member_uid_in, logbook_entry_uid_in) INTO valid_account_id, valid_org_id, valid_logbook_id, valid_logbook_entry_id, valid_logbook_entry_nugget_id;
+    
+	-- Create the nugget
+	INSERT INTO opensociocracy_api.nugget(
+		pub_at, 
+		  un_pub_at, 
+		  public_title, 
+		  internal_name, 
+		  blocks,
+		  nugget_type, 
+		  org_id, 
+		  account_id)
+		 VALUES(
+			 pub_at_in, 
+			 un_pub_at_in, 
+			 public_title_in, 
+			 internal_name_in, 
+			 blocks_in,
+			 nugget_type_in, 
+			 valid_org_id,
+			 valid_account_id
+			)
+		-- Store nugget creation results
+		RETURNING opensociocracy_api.nugget.id, opensociocracy_api.nugget.uid, opensociocracy_api.nugget.created_at 
+		INTO new_nugget_id, new_nugget_uid;
+	
+	-- Create a new comment, referencing the nugget as data_nugget
+	INSERT INTO opensociocracy_api.comment(target_nugget_id, data_nugget_id, note)
+		 VALUES(
+			valid_logbook_entry_nugget_id,
+		    new_nugget_id,
+		     note_in)
+		 RETURNING opensociocracy_api.comment.id, opensociocracy_api.comment.uid, opensociocracy_api.comment.created_at INTO new_comment_id, new_comment_uid, new_comment_created_at;
+
+	-- Return ID and UID of nugget and logbookRecord
+	RETURN QUERY SELECT new_nugget_id, new_nugget_uid, new_comment_id, new_comment_uid, new_comment_created_at;
+	
+	
+END; 
+$$;
+
+
+--
 -- Name: create_logbook_entry_nugget(uuid, uuid, timestamp with time zone, timestamp with time zone, character varying, character varying, jsonb, opensociocracy_api.nugget_types, text); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -811,12 +910,12 @@ $$;
 -- Name: valid_logbook_entry_account_org(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.valid_logbook_entry_account_org(member_uid_in uuid, logbook_entry_uid_in uuid) RETURNS TABLE(account_id bigint, org_id bigint, logbook_id bigint)
+CREATE FUNCTION opensociocracy_api.valid_logbook_entry_account_org(member_uid_in uuid, logbook_entry_uid_in uuid) RETURNS TABLE(account_id bigint, org_id bigint, logbook_id bigint, logbook_entry_id bigint, logbook_entry_nugget_id bigint)
     LANGUAGE plpgsql
     AS $$
 BEGIN
 	
-	RETURN QUERY (SELECT a.id AS account_id, o.id AS org_id, l.id AS logbook_id
+	RETURN QUERY (SELECT a.id AS account_id, o.id AS org_id, l.id AS logbook_id, le.id AS logbook_entry_id, le.nugget_id AS logbook_entry_nugget_id
 		FROM opensociocracy_api.account a
 		INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
 		INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
@@ -1412,11 +1511,19 @@ ALTER TABLE ONLY opensociocracy_api.account_member
 
 
 --
--- Name: comment fk_comment_nugget_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: comment fk_comment_data_nugget_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
 ALTER TABLE ONLY opensociocracy_api.comment
-    ADD CONSTRAINT fk_comment_nugget_id FOREIGN KEY (target_nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
+    ADD CONSTRAINT fk_comment_data_nugget_id FOREIGN KEY (data_nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
+
+
+--
+-- Name: comment fk_comment_target_nugget_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.comment
+    ADD CONSTRAINT fk_comment_target_nugget_id FOREIGN KEY (target_nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
 
 
 --

@@ -55,6 +55,7 @@ async function entryEntryCreateRoutes(server, options) {
             type: "object",
             properties: {
               commentUid: { type: "string" },
+              commentNuggetUid: { type: "string" },
               createdAt: { type: "string" }
             },
           },
@@ -80,8 +81,10 @@ async function entryEntryCreateRoutes(server, options) {
         result = await server.nuggetService.createNuggetWithLogbookEntryComment(memberUid, logbookEntryUid, metaData, req.body.nugget);
 
       } else {
-        result = await server.commentService.createLogbookEntryComment(memberUid, logbookEntryUid, metaData);
+        result = await server.logbookEntryService.createLogbookEntryComment(memberUid, logbookEntryUid, metaData);
       }
+
+      console.log('REEESULT', result)
 
       return result;
     }
