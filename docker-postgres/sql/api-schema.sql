@@ -695,7 +695,7 @@ BEGIN
 	FROM logbook_entry le
 	JOIN nugget n ON n.id = le.nugget_id
 	JOIN reaction r ON r.nugget_id = n.id
-	INNER JOIN org o ON o.id = l.org_id
+	INNER JOIN org o ON o.id = n.org_id
 	INNER JOIN account a ON a.id = o.account_id
 	INNER JOIN account_member am ON am.account_id = a.id
 	INNER JOIN member m ON m.id = am.member_id
