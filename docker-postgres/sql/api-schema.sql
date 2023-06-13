@@ -680,6 +680,32 @@ $$;
 
 
 --
+-- Name: get_logbook_entry_reactions(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.get_logbook_entry_reactions(member_uid_in uuid, logbook_entry_uid_in uuid) RETURNS TABLE("memberUid" uuid, "reactedAt" timestamp without time zone, reactions opensociocracy_api.reaction_types[])
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT 
+				  m.uid, 
+				  r.reacted_at, 
+				  r.reactions
+	FROM logbook_entry le
+	JOIN nugget n ON n.id = le.nugget_id
+	JOIN reaction r ON r.nugget_id = n.id
+	INNER JOIN org o ON o.id = l.org_id
+	INNER JOIN account a ON a.id = o.account_id
+	INNER JOIN account_member am ON am.account_id = a.id
+	INNER JOIN member m ON m.id = am.member_id
+	WHERE m.uid = member_uid_in
+ 	AND le.uid = logbook_entry_uid_in );
+END
+$$;
+
+
+--
 -- Name: get_logbook_nugget(uuid, uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -848,6 +874,38 @@ BEGIN
 					WHERE l.uid = logbook_uid_in
 					AND m.uid = member_uid_in
 					AND (om.role = ANY('{"owner","leader"}') OR  'owner' = ANY(am.roles)));	
+END; 
+$$;
+
+
+--
+-- Name: member_by_email(character varying); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.member_by_email(email_in character varying) RETURNS TABLE(id bigint, uid uuid)
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE found_id bigint;
+DECLARE found_uid uuid;
+
+BEGIN
+
+	SELECT m.id, m.uid FROM (
+	SELECT user_id 
+	FROM supertokens.emailpassword_users eu 
+	WHERE eu.email = LOWER(email_in)
+	UNION 
+	SELECT user_id
+	FROM supertokens.passwordless_users pu 
+	WHERE pu.email = LOWER(email_in)
+	) AS t
+	JOIN member m ON m.uid = UUID(t.user_id)
+	LIMIT 1 INTO found_id, found_uid;
+	
+	RETURN QUERY SELECT found_id, found_uid;
+
+	
 END; 
 $$;
 
@@ -1320,7 +1378,7 @@ CREATE TABLE opensociocracy_api.reaction (
     nugget_id bigint NOT NULL,
     member_id bigint NOT NULL,
     reacted_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    reaction opensociocracy_api.reaction_types[] DEFAULT '{like}'::opensociocracy_api.reaction_types[] NOT NULL
+    reactions opensociocracy_api.reaction_types[] DEFAULT '{like}'::opensociocracy_api.reaction_types[] NOT NULL
 );
 
 
