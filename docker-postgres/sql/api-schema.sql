@@ -1357,6 +1357,35 @@ ALTER SEQUENCE opensociocracy_api.nugget_id_seq OWNED BY opensociocracy_api.nugg
 
 
 --
+-- Name: nugget_metric; Type: TABLE; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TABLE opensociocracy_api.nugget_metric (
+    nugget_id bigint NOT NULL,
+    comments integer,
+    consent integer,
+    object integer,
+    abstain integer,
+    agree integer,
+    disagree integer,
+    unsure integer,
+    "like" integer,
+    dislike integer,
+    neutral integer,
+    promote integer,
+    bury integer,
+    block integer,
+    sympathy integer,
+    empathy integer,
+    concern integer,
+    frustration integer,
+    anger integer,
+    confusion integer,
+    boredom integer
+);
+
+
+--
 -- Name: org; Type: TABLE; Schema: opensociocracy_api; Owner: -
 --
 
@@ -1578,6 +1607,14 @@ ALTER TABLE ONLY opensociocracy_api.member
 
 ALTER TABLE ONLY opensociocracy_api.comment
     ADD CONSTRAINT nugget_comment_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: nugget_metric nugget_metric_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.nugget_metric
+    ADD CONSTRAINT nugget_metric_pkey PRIMARY KEY (nugget_id);
 
 
 --
