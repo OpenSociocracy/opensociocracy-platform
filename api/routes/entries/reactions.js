@@ -32,7 +32,7 @@ async function entryEntryCreateRoutes(server, options) {
     }
   );
 
-  server.post(
+  server.put(
     "/entries/:logbookEntryUid/reactions",
     {
       preHandler: verifySession(),
@@ -54,9 +54,7 @@ async function entryEntryCreateRoutes(server, options) {
             description: "Success Response",
             type: "object",
             properties: {
-              reactionUid: { type: "string" },
-              reactionNuggetUid: { type: "string" },
-              createdAt: { type: "string" }
+              reactedAt: { type: "string" }
             },
           },
         },
@@ -69,7 +67,7 @@ async function entryEntryCreateRoutes(server, options) {
 
       let result;
 
-      result = await server.logbookEntryService.createLogbookEntryReaction(memberUid, logbookEntryUid, metaData);
+      result = await server.logbookEntryService.setLogbookEntryReaction(memberUid, logbookEntryUid, req.body.reactions);
 
       return result;
     }

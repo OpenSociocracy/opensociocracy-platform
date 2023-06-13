@@ -879,6 +879,29 @@ $$;
 
 
 --
+-- Name: logbook_entry_by_member(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.logbook_entry_by_member(member_uid_in uuid, logbook_entry_uid_in uuid) RETURNS TABLE(logbook_id bigint, logbook_nugget_id bigint)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+	
+	RETURN QUERY (SELECT le.id AS logbook_id, le.nugget_id AS logbook_nugget_id
+					FROM logbook_entry le
+				  INNER JOIN logbook l ON l.id =le.logbook_id
+					JOIN org o ON o.id = l.org_id
+					JOIN org_member om ON om.org_id = o.id
+					JOIN account a ON a.id = o.account_id
+					JOIN account_member am ON am.account_id = a.id
+					JOIN member m ON m.id = am.member_id
+					WHERE le.uid = logbook_entry_uid_in
+					AND m.uid = member_uid_in);	
+END; 
+$$;
+
+
+--
 -- Name: member_by_email(character varying); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
@@ -1002,6 +1025,35 @@ BEGIN
 	WHERE nugget.id = found_nugget_id;
 	 
 	RETURN QUERY SELECT logbook_entry_uid_in, new_updated_at;
+	
+	
+END; 
+$$;
+
+
+--
+-- Name: set_logbook_entry_reaction(uuid, uuid, opensociocracy_api.reaction_types[]); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE FUNCTION opensociocracy_api.set_logbook_entry_reaction(member_uid_in uuid, logbook_entry_uid_in uuid, reactions_in opensociocracy_api.reaction_types[]) RETURNS TABLE("reactedAt" timestamp without time zone)
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE new_reacted_at timestamp without time zone;
+
+BEGIN
+    
+	INSERT INTO opensociocracy_api.reaction(nugget_id, member_id, reactions)
+		 VALUES(
+			(SELECT logbook_nugget_id FROM logbook_entry_by_member(member_uid_in, logbook_entry_uid_in)),
+		    (SELECT id FROM member WHERE uid = member_uid_in),
+		     reactions_in)
+		ON CONFLICT ON CONSTRAINT reaction_pkey
+		DO UPDATE SET reactions = reactions_in
+		 RETURNING opensociocracy_api.reaction.reacted_at INTO new_reacted_at;
+		
+	 
+	RETURN QUERY SELECT new_reacted_at;
 	
 	
 END; 

@@ -72,7 +72,28 @@ const LogbookEntryService = (postgres) => {
     }
   }
 
-  return { getLogbookEntry, patchLogbookEntry, createLogbookEntryComment };
+  const setLogbookEntryReaction = async (memberUid, logbookEntryUid, reactions) => {
+    const client = await postgres.connect();
+
+    const query = `SELECT "reactedAt" 
+        FROM set_logbook_entry_reaction(
+          $1, $2, $3
+      )`;
+
+    const values = [memberUid, logbookEntryUid, reactions];
+
+    try {
+      const result = await client.query(query, values);
+
+      // Note: avoid doing expensive computation here, this will block releasing the client
+      return result.rows[0];
+    } finally {
+      // Release the client immediately after query resolves, or upon error
+      client.release();
+    }
+  };
+
+  return { getLogbookEntry, patchLogbookEntry, createLogbookEntryComment, setLogbookEntryReaction };
 };
 
 export default fp((server, options, next) => {
