@@ -3,23 +3,26 @@ import { verifySession } from "supertokens-node/recipe/session/framework/fastify
 
 async function entryEntryCreateRoutes(server, options) {
   server.get(
-    "/entries/:logbookEntryUid/comments",
+    "/comments/:commentUid",
     {
       preHandler: verifySession(),
       schema: {
-        description: "Get a logbook entry's comments",
-        tags: ["entries","comments"],
-        summary: "Get a logbook entry's top-level comments.",
+        description: "Get a comment",
+        tags: ["comments"],
+        summary: "Get a single comment",
         response: {
           200: {
             description: "Success Response",
             type: "object",
             properties: {
+              commentUid: { type: "string" },
+              createdAt: { type: "string" },
+              updatedAt: { type: "string" },
               note: { type: "string" },
               pubAt: { type: "string" },
               unPubAt: { type: "string" },
-              internalName: { type: "string" },
               publicTitle: { type: "string" },
+              internalName: { type: "string" },
               blocks: {
                 type: "array",
                 items: {
@@ -30,6 +33,7 @@ async function entryEntryCreateRoutes(server, options) {
                   },
                 },
               },
+              nuggetType: { type: "string" },
             },
           },
         },
@@ -38,22 +42,24 @@ async function entryEntryCreateRoutes(server, options) {
     async (request, reply) => {
       const memberUid = request.session.getUserId();
 
-      const logbookEntryUid = request.params.logbookEntryUid;
+      const commentUid = request.params.commentUid;
 
-      const result = await server.commentService.getLogbookEntryComments(memberUid, logbookEntryUid);
+      const result = await server.commentService.getComment(
+        memberUid,
+        commentUid
+      );
 
-      return {comments: result };
+      return result;
     }
   );
-
-  server.post(
-    "/entries/:logbookEntryUid/comments",
+  server.patch(
+    "/comments/:commentUid",
     {
       preHandler: verifySession(),
       schema: {
-        description: "Create a new logbook entry comment",
-        tags: ["entries","comments"],
-        summary: "Comment on a logbook entry",
+        description: "Update a comment",
+        tags: ["comments"],
+        summary: "Update a comment",
         body: {
           type: "object",
           properties: {
@@ -80,41 +86,28 @@ async function entryEntryCreateRoutes(server, options) {
             type: "object",
             properties: {
               commentUid: { type: "string" },
-              commentNuggetUid: { type: "string" },
-              createdAt: { type: "string" }
+              updatedAt: { type: "string" },
             },
           },
         },
       },
     },
-    async (req, reply) => {
-      const memberUid = req.session.getUserId();
+    async (request, reply) => {
+      const memberUid = request.session.getUserId();
 
-      const logbookEntryUid = req.params.logbookEntryUid;
+      const commentUid = request.params.commentUid;
 
-      let result;
+      const result = await server.commentService.patchComment(
+        memberUid,
+        commentUid,
+        request.body
+      );
 
-      let metaData = {};
-      metaData.note = req.body.note ? req.body.note : null;
-
-      // If there is nugget data, we need to create the nugget first.
-      if(req.body.nugget)  {
-
-        // console.log(memberUid, logbookEntryUid, metaData, req.body.nugget)
-
-        // Use the logbookUid to get the proper org_id
-        result = await server.nuggetService.createNuggetWithLogbookEntryComment(memberUid, logbookEntryUid, metaData, req.body.nugget);
-
-      } else {
-        result = await server.logbookEntryService.createLogbookEntryComment(memberUid, logbookEntryUid, metaData);
-      }
-
-      console.log('REEESULT', result)
+      console.log("MYREESULT", result);
 
       return result;
     }
   );
- 
 }
 
 export default fastifyPlugin(entryEntryCreateRoutes);

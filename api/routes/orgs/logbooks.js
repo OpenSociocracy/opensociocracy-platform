@@ -2,36 +2,50 @@ import fastifyPlugin from "fastify-plugin";
 import { verifySession } from "supertokens-node/recipe/session/framework/fastify/index.js";
 
 async function logbookOrganizationsRoutes(server, options) {
-  server.get("/org/:orgUid/logbooks",
-  {
-    preHandler: verifySession(),
-    schema: {
-      description:
-        "Get Logbooks for an Organization",
-      tags: ["logbooks"],
-      summary: "Get all logbooks for a given org",
-      response: {
-        200: {
-          description: "Success Response",
-          type: "object",
-          properties: {
-            logbooks: { type: "array" },
+  server.get(
+    "/org/:orgUid/logbooks",
+    {
+      preHandler: verifySession(),
+      schema: {
+        description: "Get Logbooks for an Organization",
+        tags: ["orgs", "logbooks"],
+        summary: "Get all logbooks for a given org",
+        response: {
+          200: {
+            description: "Success Response",
+            type: "object",
+            properties: {
+              logbooks: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    logbookUid: { type: "string" },
+                    createdAt: { type: "string" },
+                    name: { type: "string" },
+                  },
+                },
+              },
+            },
           },
         },
       },
     },
-  },
-  async (request, reply) => {
-    let memberUid = request.session.getUserId();
+    async (request, reply) => {
+      let memberUid = request.session.getUserId();
 
-    const orgUid = request.params.orgUid;
+      const orgUid = request.params.orgUid;
 
-    const logbooks = await server.logbookService.getOrgLogbooks(memberUid, orgUid);
+      const logbooks = await server.logbookService.getOrgLogbooks(
+        memberUid,
+        orgUid
+      );
 
-    return {
-      logbooks: logbooks,
-    };
-  });
+      return {
+        logbooks: logbooks,
+      };
+    }
+  );
 }
 
 export default fastifyPlugin(logbookOrganizationsRoutes);
