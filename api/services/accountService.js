@@ -10,10 +10,12 @@ const AccountService = (postgres) => {
       const {
         rows,
       } = await client.query(
-        ` SELECT *
+        ` SELECT "accountUid", "createdAt", name, roles::text[]
         FROM get_member_accounts($1)`,
         [memberUid]
       );
+
+      console.log(rows)
 
       // Note: avoid doing expensive computation here, this will block releasing the client
       return rows;
@@ -29,7 +31,7 @@ const AccountService = (postgres) => {
     let query;
     let values;
 
-    query = `SELECT uid, created_at
+    query = `SELECT uid, created_at, roles::text[]
         FROM create_account(
           $1, $2
       )`;
@@ -43,9 +45,10 @@ const AccountService = (postgres) => {
 
       // Note: avoid doing expensive computation here, this will block releasing the client
       return {
-        uid: newData.uid,
+        accountUid: newData.uid,
         createdAt: newData.created_at,
-        name: accountData.name
+        name: accountData.name,
+        roles: newData.roles
       };
     } finally {
       // Release the client immediately after query resolves, or upon error

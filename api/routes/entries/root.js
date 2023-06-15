@@ -23,7 +23,16 @@ async function entryEntryCreateRoutes(server, options) {
               unPubAt: { type: "string" },
               publicTitle: { type: "string" },
               internalName: { type: "string" },
-              blocks: { type: "array" },
+              blocks: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    blockType: { type: "string" },
+                    data: { type: "object" },
+                  },
+                },
+              },
               nuggetType: { type: "string" }
             },
           },
@@ -51,10 +60,21 @@ async function entryEntryCreateRoutes(server, options) {
         body: {
           type: "object",
           properties: {
-            name: {
-              type: "string",
-              description: "The name for the entry",
+            note: { type: "string" },
+            pubAt: { type: "string" },
+            unPubAt: { type: "string" },
+            internalName: { type: "string" },
+            publicTitle: { type: "string" },
+            blocks: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  blockType: { type: "string" },
+                  data: { type: "object" },
+                },
               },
+            },
           },
         },
         response: {
