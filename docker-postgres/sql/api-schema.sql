@@ -1147,7 +1147,8 @@ CREATE TABLE opensociocracy_api.account (
     id bigint NOT NULL,
     uid uuid DEFAULT gen_random_uuid() NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    name character varying(150)
+    name character varying(150),
+    nugget_id bigint
 );
 
 
@@ -1181,6 +1182,44 @@ CREATE TABLE opensociocracy_api.account_member (
     updated_at timestamp without time zone,
     roles opensociocracy_api.account_roles[] DEFAULT '{viewer}'::opensociocracy_api.account_roles[] NOT NULL
 );
+
+
+--
+-- Name: asset; Type: TABLE; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE TABLE opensociocracy_api.asset (
+    id bigint NOT NULL,
+    uid uuid DEFAULT gen_random_uuid(),
+    name character varying(150),
+    byte_size integer,
+    ext character varying(16),
+    location character varying(2500),
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp without time zone,
+    deleted boolean DEFAULT false NOT NULL,
+    org_id bigint,
+    account_id bigint
+);
+
+
+--
+-- Name: asset_id_seq; Type: SEQUENCE; Schema: opensociocracy_api; Owner: -
+--
+
+CREATE SEQUENCE opensociocracy_api.asset_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: asset_id_seq; Type: SEQUENCE OWNED BY; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER SEQUENCE opensociocracy_api.asset_id_seq OWNED BY opensociocracy_api.asset.id;
 
 
 --
@@ -1314,7 +1353,8 @@ CREATE TABLE opensociocracy_api.nugget (
     blocks jsonb DEFAULT '{}'::jsonb,
     nugget_type opensociocracy_api.nugget_types DEFAULT 'json'::opensociocracy_api.nugget_types NOT NULL,
     org_id bigint,
-    account_id bigint NOT NULL
+    account_id bigint NOT NULL,
+    subtype character varying(32)
 );
 
 
@@ -1508,6 +1548,13 @@ ALTER TABLE ONLY opensociocracy_api.account ALTER COLUMN id SET DEFAULT nextval(
 
 
 --
+-- Name: asset id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.asset ALTER COLUMN id SET DEFAULT nextval('opensociocracy_api.asset_id_seq'::regclass);
+
+
+--
 -- Name: comment id; Type: DEFAULT; Schema: opensociocracy_api; Owner: -
 --
 
@@ -1577,6 +1624,14 @@ ALTER TABLE ONLY opensociocracy_api.account_member
 
 ALTER TABLE ONLY opensociocracy_api.account
     ADD CONSTRAINT account_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: asset asset_pkey; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.asset
+    ADD CONSTRAINT asset_pkey PRIMARY KEY (id);
 
 
 --
@@ -1657,6 +1712,22 @@ ALTER TABLE ONLY opensociocracy_api.reaction
 
 ALTER TABLE ONLY opensociocracy_api.reply
     ADD CONSTRAINT response_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: account uq_account_uid; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.account
+    ADD CONSTRAINT uq_account_uid UNIQUE (uid);
+
+
+--
+-- Name: asset uq_asset_uid; Type: CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.asset
+    ADD CONSTRAINT uq_asset_uid UNIQUE (uid);
 
 
 --
@@ -1786,6 +1857,30 @@ ALTER TABLE ONLY opensociocracy_api.account_member
 
 ALTER TABLE ONLY opensociocracy_api.account_member
     ADD CONSTRAINT fk_account_member_member_id FOREIGN KEY (member_id) REFERENCES opensociocracy_api.member(id) NOT VALID;
+
+
+--
+-- Name: account fk_account_nugget_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.account
+    ADD CONSTRAINT fk_account_nugget_id FOREIGN KEY (nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
+
+
+--
+-- Name: asset fk_asset_account_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.asset
+    ADD CONSTRAINT fk_asset_account_id FOREIGN KEY (account_id) REFERENCES opensociocracy_api.account(id) NOT VALID;
+
+
+--
+-- Name: asset fk_asset_orgid; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.asset
+    ADD CONSTRAINT fk_asset_orgid FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id) NOT VALID;
 
 
 --
@@ -2004,6 +2099,13 @@ GRANT ALL ON SEQUENCE opensociocracy_api.nugget_comment_id_seq TO opensociocracy
 --
 
 GRANT ALL ON SEQUENCE opensociocracy_api.nugget_id_seq TO opensociocracy_supertokens;
+
+
+--
+-- Name: TABLE nugget_metric; Type: ACL; Schema: opensociocracy_api; Owner: -
+--
+
+GRANT ALL ON TABLE opensociocracy_api.nugget_metric TO opensociocracy_supertokens;
 
 
 --
