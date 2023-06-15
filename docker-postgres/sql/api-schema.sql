@@ -136,13 +136,14 @@ $$;
 -- Name: create_account(uuid, character varying); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.create_account(owner_uid uuid, name_in character varying) RETURNS TABLE(id bigint, uid uuid, created_at timestamp without time zone)
+CREATE FUNCTION opensociocracy_api.create_account(owner_uid uuid, name_in character varying) RETURNS TABLE(id bigint, uid uuid, created_at timestamp without time zone, roles opensociocracy_api.account_roles[])
     LANGUAGE plpgsql
     AS $$
 
 DECLARE new_account_id BIGINT;
 DECLARE new_account_uid uuid;
 DECLARE new_account_created_at timestamp without time zone;
+DECLARE new_account_member_roles account_roles[];
 
 BEGIN
     
@@ -151,9 +152,10 @@ BEGIN
 		 RETURNING opensociocracy_api.account.id, opensociocracy_api.account.uid, opensociocracy_api.account.created_at INTO new_account_id, new_account_uid, new_account_created_at;
 		
 	INSERT INTO opensociocracy_api.account_member(account_id, member_id , roles)
-		 VALUES(new_account_id, (SELECT m.id FROM opensociocracy_api.member m where m.uid = owner_uid),  '{"owner"}');
+		 VALUES(new_account_id, (SELECT m.id FROM opensociocracy_api.member m where m.uid = owner_uid),  '{"owner"}')
+		 RETURNING opensociocracy_api.account_member.roles INTO new_account_member_roles;
 
-	RETURN QUERY SELECT new_account_id, new_account_uid, new_account_created_at;
+	RETURN QUERY SELECT new_account_id, new_account_uid, new_account_created_at, new_account_member_roles;
 	
 	
 END; 

@@ -31,7 +31,7 @@ const AccountService = (postgres) => {
     let query;
     let values;
 
-    query = `SELECT uid, created_at
+    query = `SELECT uid, created_at, roles::text[]
         FROM create_account(
           $1, $2
       )`;
@@ -47,7 +47,8 @@ const AccountService = (postgres) => {
       return {
         uid: newData.uid,
         createdAt: newData.created_at,
-        name: accountData.name
+        name: accountData.name,
+        roles: newData.roles
       };
     } finally {
       // Release the client immediately after query resolves, or upon error
