@@ -8,7 +8,7 @@ async function entryEntryCreateRoutes(server, options) {
       preHandler: verifySession(),
       schema: {
         description: "Get a logbook entry's reactions",
-        tags: ["entries"],
+        tags: ["entries","reactions"],
         summary: "Get a logbook entry's top-level reactions.",
         response: {
           200: {
@@ -38,7 +38,7 @@ async function entryEntryCreateRoutes(server, options) {
       preHandler: verifySession(),
       schema: {
         description: "Create a new logbook entry reaction",
-        tags: ["logbooks"],
+        tags: ["entries","reactions"],
         summary: "Reaction on a logbook entry",
         body: {
           type: "object",

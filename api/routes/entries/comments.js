@@ -8,14 +8,28 @@ async function entryEntryCreateRoutes(server, options) {
       preHandler: verifySession(),
       schema: {
         description: "Get a logbook entry's comments",
-        tags: ["entries"],
+        tags: ["entries","comments"],
         summary: "Get a logbook entry's top-level comments.",
         response: {
           200: {
             description: "Success Response",
             type: "object",
             properties: {
-              comments: { type: "array" },
+              note: { type: "string" },
+              pubAt: { type: "string" },
+              unPubAt: { type: "string" },
+              internalName: { type: "string" },
+              publicTitle: { type: "string" },
+              blocks: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    blockType: { type: "string" },
+                    data: { type: "object" },
+                  },
+                },
+              },
             },
           },
         },
@@ -38,15 +52,26 @@ async function entryEntryCreateRoutes(server, options) {
       preHandler: verifySession(),
       schema: {
         description: "Create a new logbook entry comment",
-        tags: ["logbooks"],
+        tags: ["entries","comments"],
         summary: "Comment on a logbook entry",
         body: {
           type: "object",
           properties: {
-            name: {
-              type: "string",
-              description: "The name for the logbook",
+            note: { type: "string" },
+            pubAt: { type: "string" },
+            unPubAt: { type: "string" },
+            internalName: { type: "string" },
+            publicTitle: { type: "string" },
+            blocks: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  blockType: { type: "string" },
+                  data: { type: "object" },
+                },
               },
+            },
           },
         },
         response: {

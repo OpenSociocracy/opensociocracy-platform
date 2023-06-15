@@ -2,45 +2,46 @@ import fastifyPlugin from "fastify-plugin";
 import { verifySession } from "supertokens-node/recipe/session/framework/fastify/index.js";
 
 async function accountsRoutes(server, options) {
-  server.get("/accounts",
-  {
-    preHandler: verifySession(),
-    schema: {
-      description:
-        "Get authenticated member accounts",
-      tags: ["accounts"],
-      summary: "Get all accounts for the authenticated member",
-      response: {
-        200: {
-          description: "Success Response",
-          type: "object",
-          properties: {
-            accounts: { 
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  accountUid: { type: "string" },
-                  createdAt: { type: "string" },
-                  name: { type: "string" },
-                  roles: { type: "array"}
-                }
-              } 
+  server.get(
+    "/accounts",
+    {
+      preHandler: verifySession(),
+      schema: {
+        description: "Get authenticated member accounts",
+        tags: ["accounts"],
+        summary: "Get all accounts for the authenticated member",
+        response: {
+          200: {
+            description: "Success Response",
+            type: "object",
+            properties: {
+              accounts: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    accountUid: { type: "string" },
+                    createdAt: { type: "string" },
+                    name: { type: "string" },
+                    roles: { type: "array", items: { type: "string" } },
+                  },
+                },
+              },
             },
           },
         },
       },
     },
-  },
-  async (request, reply) => {
-    let memberUid = request.session.getUserId();
+    async (request, reply) => {
+      let memberUid = request.session.getUserId();
 
-    const accounts = await server.accountService.getMemberAccounts(memberUid);
+      const accounts = await server.accountService.getMemberAccounts(memberUid);
 
-    return {
-      accounts: accounts,
-    };
-  });
+      return {
+        accounts: accounts,
+      };
+    }
+  );
 
   server.post(
     "/accounts",
@@ -49,7 +50,7 @@ async function accountsRoutes(server, options) {
       schema: {
         description: "Create a new account",
         tags: ["accounts"],
-        summary: "Add a new account to the database",
+        summary: "Add a new account to the databases",
         body: {
           type: "object",
           properties: {
@@ -64,10 +65,10 @@ async function accountsRoutes(server, options) {
             description: "Success Response",
             type: "object",
             properties: {
-              uid: { type: "string" },
+              accountUid: { type: "string" },
               name: { type: "string" },
               createdAt: { type: "string" },
-              roles: { type: "array", items: { type: "string"}}
+              roles: { type: "array", items: { type: "string" } },
             },
           },
         },
@@ -76,7 +77,10 @@ async function accountsRoutes(server, options) {
     async (request, reply) => {
       let userId = request.session.getUserId();
 
-      const result = await server.accountService.createAccount(request.body, userId);
+      const result = await server.accountService.createAccount(
+        request.body,
+        userId
+      );
 
       return result;
     }

@@ -538,16 +538,18 @@ $$;
 -- Name: get_account_orgs(uuid, uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.get_account_orgs(member_uid_in uuid, account_uid_in uuid) RETURNS TABLE("orgUid" uuid, "createdAt" timestamp without time zone, name character varying, note text)
+CREATE FUNCTION opensociocracy_api.get_account_orgs(member_uid_in uuid, account_uid_in uuid) RETURNS TABLE("orgUid" uuid, "createdAt" timestamp without time zone, name character varying, note text, "logbookUid" uuid, "orgNuggetUid" uuid)
     LANGUAGE plpgsql
     AS $$
 BEGIN
 	
-	RETURN QUERY (SELECT o.uid, o.created_at, o.name, o.note
+	RETURN QUERY (SELECT o.uid, o.created_at, o.name, o.note, l.uid, n.uid
 	FROM opensociocracy_api.org o 
+	INNER JOIN opensociocracy_api.logbook l ON l.org_id = o.id
 	INNER JOIN opensociocracy_api.account a ON a.id = o.account_id
 	INNER JOIN opensociocracy_api.account_member am ON am.account_id = a.id
 	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
+	LEFT JOIN opensociocracy_api.nugget n ON n.id = o.nugget_id				  
 	WHERE m.uid = member_uid_in
  	AND a.uid =account_uid_in );
 
@@ -1316,7 +1318,8 @@ CREATE TABLE opensociocracy_api.member (
     full_name character varying(64),
     platform_username character varying(32),
     public_profile boolean DEFAULT false NOT NULL,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    nugget_id bigint
 );
 
 
@@ -1440,7 +1443,8 @@ CREATE TABLE opensociocracy_api.org (
     account_id bigint NOT NULL,
     name character varying(64),
     note text,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    nugget_id bigint
 );
 
 
@@ -1926,6 +1930,14 @@ ALTER TABLE ONLY opensociocracy_api.logbook
 
 
 --
+-- Name: member fk_member_nugget_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.member
+    ADD CONSTRAINT fk_member_nugget_id FOREIGN KEY (nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
+
+
+--
 -- Name: nugget fk_nugget_org_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
@@ -1955,6 +1967,14 @@ ALTER TABLE ONLY opensociocracy_api.org_member
 
 ALTER TABLE ONLY opensociocracy_api.org_member
     ADD CONSTRAINT fk_org_member_org_id FOREIGN KEY (org_id) REFERENCES opensociocracy_api.org(id);
+
+
+--
+-- Name: org fk_org_nugget_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+--
+
+ALTER TABLE ONLY opensociocracy_api.org
+    ADD CONSTRAINT fk_org_nugget_id FOREIGN KEY (nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
 
 
 --

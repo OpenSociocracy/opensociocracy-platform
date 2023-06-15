@@ -45,7 +45,7 @@ const AccountService = (postgres) => {
 
       // Note: avoid doing expensive computation here, this will block releasing the client
       return {
-        uid: newData.uid,
+        accountUid: newData.uid,
         createdAt: newData.created_at,
         name: accountData.name,
         roles: newData.roles

@@ -8,7 +8,7 @@ async function entryEntryCreateRoutes(server, options) {
       preHandler: verifySession(),
       schema: {
         description: "Get a comment",
-        tags: ["entries"],
+        tags: ["comments"],
         summary: "Get a single comment",
         response: {
           200: {
@@ -23,8 +23,17 @@ async function entryEntryCreateRoutes(server, options) {
               unPubAt: { type: "string" },
               publicTitle: { type: "string" },
               internalName: { type: "string" },
-              blocks: { type: "array" },
-              nuggetType: { type: "string" }
+              blocks: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    blockType: { type: "string" },
+                    data: { type: "object" },
+                  },
+                },
+              },
+              nuggetType: { type: "string" },
             },
           },
         },
@@ -35,7 +44,10 @@ async function entryEntryCreateRoutes(server, options) {
 
       const commentUid = request.params.commentUid;
 
-      const result = await server.commentService.getComment(memberUid, commentUid);
+      const result = await server.commentService.getComment(
+        memberUid,
+        commentUid
+      );
 
       return result;
     }
@@ -46,15 +58,26 @@ async function entryEntryCreateRoutes(server, options) {
       preHandler: verifySession(),
       schema: {
         description: "Update a comment",
-        tags: ["entries"],
+        tags: ["comments"],
         summary: "Update a comment",
         body: {
           type: "object",
           properties: {
-            name: {
-              type: "string",
-              description: "The name for the entry",
+            note: { type: "string" },
+            pubAt: { type: "string" },
+            unPubAt: { type: "string" },
+            internalName: { type: "string" },
+            publicTitle: { type: "string" },
+            blocks: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  blockType: { type: "string" },
+                  data: { type: "object" },
+                },
               },
+            },
           },
         },
         response: {
@@ -74,9 +97,13 @@ async function entryEntryCreateRoutes(server, options) {
 
       const commentUid = request.params.commentUid;
 
-      const result = await server.commentService.patchComment(memberUid, commentUid, request.body);
+      const result = await server.commentService.patchComment(
+        memberUid,
+        commentUid,
+        request.body
+      );
 
-      console.log('MYREESULT', result)
+      console.log("MYREESULT", result);
 
       return result;
     }
