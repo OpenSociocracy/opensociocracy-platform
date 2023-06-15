@@ -1363,6 +1363,8 @@ ALTER SEQUENCE opensociocracy_api.nugget_id_seq OWNED BY opensociocracy_api.nugg
 CREATE TABLE opensociocracy_api.nugget_metric (
     nugget_id bigint NOT NULL,
     comments integer,
+    views integer,
+    shares integer,
     consent integer,
     object integer,
     abstain integer,
