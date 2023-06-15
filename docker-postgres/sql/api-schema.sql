@@ -768,12 +768,12 @@ $$;
 -- Name: get_member_accounts(uuid); Type: FUNCTION; Schema: opensociocracy_api; Owner: -
 --
 
-CREATE FUNCTION opensociocracy_api.get_member_accounts(uid_in uuid) RETURNS TABLE("accountUid" uuid, "createdAt" timestamp without time zone, name character varying)
+CREATE FUNCTION opensociocracy_api.get_member_accounts(uid_in uuid) RETURNS TABLE("accountUid" uuid, "createdAt" timestamp without time zone, name character varying, roles opensociocracy_api.account_roles[])
     LANGUAGE plpgsql
     AS $$
 BEGIN
 	
-	RETURN QUERY (SELECT a.uid, a.created_at, a.name
+	RETURN QUERY (SELECT a.uid, a.created_at, a.name, am.roles
 	FROM opensociocracy_api.account_member am 
 	INNER JOIN opensociocracy_api.account a ON a.id = am.account_id
 	INNER JOIN opensociocracy_api.member m ON m.id = am.member_id
@@ -1199,7 +1199,7 @@ CREATE TABLE opensociocracy_api.asset (
     updated_at timestamp without time zone,
     deleted boolean DEFAULT false NOT NULL,
     org_id bigint,
-    account_id bigint
+    nugget_id bigint
 );
 
 
@@ -1515,9 +1515,9 @@ CREATE TABLE opensociocracy_api.reply (
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     comment_id bigint,
     reply_id bigint,
-    org_id bigint NOT NULL,
     nugget_id bigint NOT NULL,
-    note text
+    note text,
+    org_id bigint
 );
 
 
@@ -1868,11 +1868,11 @@ ALTER TABLE ONLY opensociocracy_api.account
 
 
 --
--- Name: asset fk_asset_account_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
+-- Name: asset fk_asset_nugget_id; Type: FK CONSTRAINT; Schema: opensociocracy_api; Owner: -
 --
 
 ALTER TABLE ONLY opensociocracy_api.asset
-    ADD CONSTRAINT fk_asset_account_id FOREIGN KEY (account_id) REFERENCES opensociocracy_api.account(id) NOT VALID;
+    ADD CONSTRAINT fk_asset_nugget_id FOREIGN KEY (nugget_id) REFERENCES opensociocracy_api.nugget(id) NOT VALID;
 
 
 --

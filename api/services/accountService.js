@@ -10,10 +10,12 @@ const AccountService = (postgres) => {
       const {
         rows,
       } = await client.query(
-        ` SELECT *
+        ` SELECT "accountUid", "createdAt", name, roles::text[]
         FROM get_member_accounts($1)`,
         [memberUid]
       );
+
+      console.log(rows)
 
       // Note: avoid doing expensive computation here, this will block releasing the client
       return rows;

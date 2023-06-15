@@ -15,7 +15,18 @@ async function accountsRoutes(server, options) {
           description: "Success Response",
           type: "object",
           properties: {
-            accounts: { type: "array" },
+            accounts: { 
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  accountUid: { type: "string" },
+                  createdAt: { type: "string" },
+                  name: { type: "string" },
+                  roles: { type: "array"}
+                }
+              } 
+            },
           },
         },
       },
@@ -55,7 +66,8 @@ async function accountsRoutes(server, options) {
             properties: {
               uid: { type: "string" },
               name: { type: "string" },
-              createdAt: { type: "string" }
+              createdAt: { type: "string" },
+              roles: { type: "array", items: { type: "string"}}
             },
           },
         },

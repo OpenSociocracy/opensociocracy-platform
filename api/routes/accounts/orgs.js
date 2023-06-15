@@ -7,7 +7,7 @@ async function accountOrgsRoutes(server, options) {
     preHandler: verifySession(),
     schema: {
       description:
-        "Get Organizations for an Account",
+        "Organizations are listed through through the parent account.",
       tags: ["orgs"],
       summary: "Get all organizations for a given account",
       response: {
@@ -38,7 +38,7 @@ async function accountOrgsRoutes(server, options) {
     {
       preHandler: verifySession(),
       schema: {
-        description: "Create a new org",
+        description: "Create a new organizations through through the parent account. A logbook is automatically created.",
         tags: ["orgs"],
         summary: "Add a new org to the database",
         body: {
