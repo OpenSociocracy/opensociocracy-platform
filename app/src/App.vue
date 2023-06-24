@@ -2,7 +2,7 @@
   <router-view />
 </template>
 
-<script>
+<script setup>
 import { defineComponent } from 'vue'
 
 import SuperTokens from 'supertokens-web-js';
@@ -21,7 +21,4 @@ SuperTokens.init({
     ],
 });
 
-export default defineComponent({
-  name: 'App'
-})
 </script>

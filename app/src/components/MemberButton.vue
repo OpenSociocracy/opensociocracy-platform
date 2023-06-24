@@ -40,6 +40,7 @@
         </q-item-section>
       </q-item>
 
+      <!--
       <q-item clickable v-close-popup @click="theme.toggleDarkMode()">
         <q-item-section avatar>
           <q-icon name="mdi-theme-light-dark" color="primary"/>
@@ -48,6 +49,7 @@
           <q-item-label>{{ $t('nav.darkMode') }}</q-item-label>
         </q-item-section>
       </q-item>
+      -->
 
       <q-item clickable v-close-popup v-if="!auth.isSignedIn" @click="triggerSignInDialog()">
         <q-item-section avatar>
