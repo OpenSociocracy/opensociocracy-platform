@@ -19,8 +19,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Join in', link: 'https://handbook.opensociocracy.org/contributing/' },
-      { text: 'Tech Docs', link: '/technical-docs/' },
+      { text: 'Join in', link: 'https://discord.gg/tG7sCar5' },
     ],
 
     socialLinks: [
@@ -33,7 +32,7 @@ export default defineConfig({
 
     footer: {
       message: 'Sponsored by <a href="https://www.ultri.com/">Ultri</a>',
-      copyright: 'Released under the <a href="https://github.com/OpenSociocracy/documentation-website/blob/main/LICENSE">MIT</a> and <a href="https://github.com/OpenSociocracy/open-sociocracy-saas/blob/main/LICENSE">AGPL</a> License</a>.<br />Copyright <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA</a>'
+      copyright: 'Released under the <a href="https://github.com/OpenSociocracy/documentation-website/blob/main/LICENSE">MIT</a> license</a>.<br />Copyright <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA</a>'
     }
   }
 })

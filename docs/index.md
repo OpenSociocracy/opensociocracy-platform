@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: Help guide the effort
-      link: https://handbook.opensociocracy.org/
+      link: https://discord.gg/tG7sCar5
 
 features:
   - title: Open Source
