@@ -19,7 +19,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Join in', link: 'https://discord.gg/tG7sCar5' },
+      { text: 'Join in', link: 'https://discord.gg/rZBBhKwe' },
     ],
 
     socialLinks: [

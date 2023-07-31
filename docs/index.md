@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: Help guide the effort
-      link: https://discord.gg/tG7sCar5
+      link: https://discord.gg/rZBBhKwe
     - theme: alt
       text: Co-op Ownership Model
       link: https://coop.ultri.com
